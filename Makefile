@@ -1,4 +1,4 @@
-CCFLAGS = -ggdb -lpthread
+CCFLAGS = -ggdb -pthread
 
 server: server.c 
 	gcc $(CCFLAGS) server.c -o server
