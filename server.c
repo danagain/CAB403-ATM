@@ -37,16 +37,18 @@ float openingBalance;
 char saveAcNum[20];
 float closingBalance;
 int saveTracker;
-          char onlineCnum[14];
-          char onlineAc1[14];
-          char onlineAc2[14];
-          char onlineAc3[14];
-          char onlineName[14];
-          char onlineSurname[14];
-	int usersClientNum;
-
-					char onlineOpen[14];
-					char onlineClose[14];
+char onlineCnum[14];
+char onlineAc1[14];
+char onlineAc2[14];
+char onlineAc3[14];
+char onlineName[14];
+char onlineSurname[14];
+int usersClientNum;
+char onlineOpen[14];
+char onlineClose[14];
+char onlineOpen2[14];
+char onlineClose2[14];
+char onlineClose3[14];
 
   //AUTH STRUCT
   struct Clients {
@@ -65,6 +67,14 @@ int saveTracker;
 		float open;
 		float close;
 		}figs;
+	struct Figs2{
+		float open;
+		float close;
+		}figs2;
+	struct Figs3{
+		float open;
+		float close;
+		}figs3;
     int account1;
     int account2;
     int account3;
@@ -315,10 +325,18 @@ void *client_handler(void *socket_desc)
 						clientsinfo[tracker].figs.close = accounts[j].closeBal;
 						printf("\n\nClient Number = %i \n Account Number %i \n Opening Balance = %f \n Closing Balance = %f \n",clientsinfo[tracker].clientnum,clientsinfo[tracker].account1, clientsinfo[tracker].figs.open, clientsinfo[tracker].figs.close);
 }
+						if(clientsinfo[tracker].account2 == accounts[j].accNum){
+						clientsinfo[tracker].figs2.open = accounts[j].openBal;
+						clientsinfo[tracker].figs2.close = accounts[j].closeBal;
+						
+}
 }
 
-										sprintf(onlineOpen, "%.2lf", clientsinfo[tracker].figs.open);
+						sprintf(onlineOpen, "%.2lf", clientsinfo[tracker].figs.open);
 						sprintf(onlineClose, "%.2lf", clientsinfo[tracker].figs.close);
+						sprintf(onlineOpen2, "%.2lf", clientsinfo[tracker].figs2.open);
+						sprintf(onlineClose2, "%.2lf", clientsinfo[tracker].figs2.close);
+						sprintf(onlineClose3, "%.2lf", clientsinfo[tracker].figs3.close);
             }
 
 tracker++;
@@ -370,8 +388,24 @@ tracker++;
         //Send the message back to client
 	sscanf(client_message, "%s %s",username,pin);
 	printf("Client input %s, First word %s, Second word %s\n", client_message, username, pin);
+
+
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "SAVINGS") == 0) {
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+
+	 write(sock , buf , strlen(buf));////////////////////////////
+	
+}
+
+	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "LOAN") == 0) {
+	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
+
+	 write(sock , buf , strlen(buf));////////////////////////////
+	
+}
+
+	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "CREDIT") == 0) {
+	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
 
 	 write(sock , buf , strlen(buf));////////////////////////////
 	
@@ -386,10 +420,13 @@ tracker++;
 	
 }
 
+
+
+
 if(strcmp(username, "CREDITSAV") == 0) {
 	clientsinfo[saveTracker].figs.close = clientsinfo[saveTracker].figs.close + atoi(pin);
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
-	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc2 , onlineClose);
 	
 	 write(sock , buf , strlen(buf));////////////////////////////
 	
