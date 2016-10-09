@@ -34,6 +34,7 @@ int detailsaccount3;
 int detailsclientnum;
 int accountNumber;
 float openingBalance;
+char saveAcNum[20];
 float closingBalance;
 int saveTracker;
           char onlineCnum[14];
@@ -384,6 +385,37 @@ tracker++;
 	 write(sock , buf , strlen(buf));////////////////////////////
 	
 }
+
+if(strcmp(username, "CREDITSAV") == 0) {
+	clientsinfo[saveTracker].figs.close = clientsinfo[saveTracker].figs.close + atoi(pin);
+	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
+	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+	
+	 write(sock , buf , strlen(buf));////////////////////////////
+	
+}
+if(strcmp(username, "TRANSFERN") == 0) {
+	sprintf(buf, "\n\n Enter how much  you wish to send to account number %s :",pin);
+	sprintf(saveAcNum,"%s", pin);
+	write(sock , buf , strlen(buf)+1);////////////////////////////
+}
+if(strcmp(username, "AMOUNT") == 0){
+for(int i = 0; i<24; i++){
+if(accounts[i].accNum == atoi(saveAcNum)){
+accounts[i].closeBal+=atoi(pin);
+printf("WOO HOO TRANSFER BABY");
+
+}
+
+}
+sprintf(buf, "\n\n You send $%s to account number %s",pin, saveAcNum);
+	write(sock , buf , strlen(buf)+1);////////////////////////////
+
+}
+
+
+
+
 
 else{
 	 write(sock , "" , strlen("")+1);}

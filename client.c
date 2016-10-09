@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
 	//return 0;
 	//}
 
-char message[1000] , server_reply[2000], fromBuf[120];
+char message[1000] , server_reply[2000], fromBuf[120], trans[1000];
 
 
 Send_Username(sockfd,username, client_pin);
@@ -326,6 +326,73 @@ break;
 }
 }
 
+
+
+while(atoi(&input[0]) == 3) {
+whatAccounts(clientAc1, clientAc2, clientAc3);
+	if(atoi(&ans[0]) == 1){
+	char* deposit;
+	printf(" Savings Balance Selected - > Send savings Credit variable to server \n");
+	printf("How much would you like to withdraw : ");
+	//fgets(message,1000,stdin);
+	scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "CREDITSAV %s", message);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n\n\n");
+	selection = true;
+break;
+
+}
+}
+
+while(atoi(&input[0]) == 4) {
+whatAccounts(clientAc1, clientAc2, clientAc3);
+	if(atoi(&ans[0]) == 1){
+	char* deposit;
+	printf(" Savings Balance Selected - > Send savings Transfer variable to server \n");
+	printf("Please enter the account number you wish to transfer too : ");
+	//fgets(message,1000,stdin);
+	scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "TRANSFERN %s", message);
+	write(sockfd , buf , strlen(buf)+1);
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n\n\n");
+	scanf("%s" ,trans);
+	sprintf(buf, "AMOUNT %s", trans);
+	write(sockfd,buf,strlen(buf)+1);
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+       }   
+	puts(server_reply);
+	selection = true;
+break;
+
+}
+}
+
  
        // Send some data
       //  if( send(sockfd , message , strlen(message)+1 , 0) < 0)
@@ -370,4 +437,4 @@ break;
 
 
 
-S
+
