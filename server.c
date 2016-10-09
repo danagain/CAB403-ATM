@@ -386,7 +386,7 @@ tracker++;
     {
 	char username[1000], pin[1000],buf[1000];
         //Send the message back to client
-	sscanf(client_message, "%s %s",username,pin);
+	sscanf(client_message, "%s %[^\r]\n",username,pin);
 	printf("Client input %s, First word %s, Second word %s\n", client_message, username, pin);
 
 
@@ -399,38 +399,63 @@ tracker++;
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "LOAN") == 0) {
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
-
 	 write(sock , buf , strlen(buf));////////////////////////////
 	
 }
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "CREDIT") == 0) {
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
-
 	 write(sock , buf , strlen(buf));////////////////////////////
 	
 }
 
 	if(strcmp(username, "WITHDRAWSAV") == 0) {
-	clientsinfo[saveTracker].figs.close = clientsinfo[saveTracker].figs.close - atoi(pin);
+	char* store;
+	float curr = strtod((pin),&store);
+	float calc = clientsinfo[saveTracker].figs.close -= curr; 
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
-	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);	
+	write(sock , buf , strlen(buf));////////////////////////////
 	
-	 write(sock , buf , strlen(buf));////////////////////////////
+}
+	if(strcmp(username, "WITHDRAWCREDIT") == 0) {
+	char* store;
+	float curr = strtod((pin),&store);
+	float calc = clientsinfo[saveTracker].figs3.close -= curr; 
+	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
+	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);	
+	write(sock , buf , strlen(buf));////////////////////////////
 	
 }
 
 
-
-
-if(strcmp(username, "CREDITSAV") == 0) {
-	clientsinfo[saveTracker].figs.close = clientsinfo[saveTracker].figs.close + atoi(pin);
+if(strcmp(username, "DEPOSITSAV") == 0) {
+	char* store;
+	float curr = strtod((pin),&store);
+	float calc = clientsinfo[saveTracker].figs.close += curr; 
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
-	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc2 , onlineClose);
-	
-	 write(sock , buf , strlen(buf));////////////////////////////
-	
+	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+	write(sock , buf , strlen(buf));////////////////////////////	
 }
+if(strcmp(username, "DEPOSITLOAN") == 0) {
+	char* store;
+	float curr = strtod((pin),&store);
+	float calc = clientsinfo[saveTracker].figs2.close += curr; 
+	sprintf(onlineClose2, "%.2lf", clientsinfo[saveTracker].figs2.close);
+	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
+	 write(sock , buf , strlen(buf));////////////////////////////	
+}
+if(strcmp(username, "DEPOSITCREDIT") == 0) {
+	char* store;
+	float curr = strtod((pin),&store);
+	float calc = clientsinfo[saveTracker].figs3.close += curr; 
+	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
+	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
+	 write(sock , buf , strlen(buf));////////////////////////////	
+}
+
+
+
 if(strcmp(username, "TRANSFERN") == 0) {
 	sprintf(buf, "\n\n Enter how much  you wish to send to account number %s :",pin);
 	sprintf(saveAcNum,"%s", pin);

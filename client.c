@@ -24,6 +24,7 @@ bool login = false;
 char* temp;
 bool selection = false;
 char buf[1000];
+char transactions[10000];
 bool account1 = false;
 bool account2 = false;
 bool account3 = false;
@@ -87,6 +88,7 @@ void interface(){
 
 char* whatAccounts(char* ac1, char* ac2, char* ac3){
 
+if(atoi(input) == 1 || atoi(input) == 3 || atoi(input) == 4 || atoi(input) == 5){
 printf("\n\nSelect account type");
 //ACCOUNT 1
 if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
@@ -128,6 +130,45 @@ printf("\n<3> Credit Card Account");
 account3 = true;
 }
 printf("\nEnter your selection (E/e to exit) - ");
+}
+
+//WITHDRAW OPTION - NO LOAN ACCOUNT
+if(atoi(input) == 2){
+printf("\n\nSelect account type");
+//ACCOUNT 1
+if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
+printf("\n<1> Savings Account");
+account1 = true;
+}
+
+if(atoi(ac1) > 0 && atoi(ac1) % 13 == 0){
+printf("\n<1> Credit Card Account");
+account3 = true;
+}
+//ACCOUNT 2
+if(atoi(ac2) > 0 && atoi(ac2) % 11 == 0){
+printf("\n<2> Savings Account");
+account1 = true;
+}
+
+if(atoi(ac2) > 0 && atoi(ac2) % 13 == 0){
+printf("\n<2> Credit Card Account");
+account3 = true;
+}
+//ACCOUNT 3
+if(atoi(ac3) > 0 && atoi(ac3) % 11 == 0){
+printf("\n<2> Savings Account");
+account1 = true;
+}
+
+if(atoi(ac3) > 0 && atoi(ac3) % 13 == 0){
+printf("\n<2> Credit Card Account");
+account3 = true;
+}
+printf("\nEnter your selection (E/e to exit) - ");
+}
+
+
 scanf("%s",ans);
 return ans;
 }
@@ -285,9 +326,9 @@ clrscr();
 	if(selection == true){
 	selectionMenu();
 }
-//        printf("Enter message : ");
-       // fgets(message ,1000,stdin);
-	//puts(message);
+
+
+//balance while loop
 	while(atoi(&input[0]) == 1) { 
 	whatAccounts(clientAc1, clientAc2, clientAc3);
 	if(atoi(&ans[0]) == 1 && account1 == true){
@@ -351,16 +392,15 @@ break;
 
 }
 
+
+//withdraw while loop
 while(atoi(&input[0]) == 2) {
 whatAccounts(clientAc1, clientAc2, clientAc3);
 	if(atoi(&ans[0]) == 1){
 	char* withdrawal;
 	printf(" Savings Balance Selected - > Send savings Withdrawal variable to server \n");
 	printf("How much would you like to withdraw : ");
-	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
-	//fgets(message,1000,stdin);
-	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "WITHDRAWSAV %s", message);
 	write(sockfd , buf , strlen(buf));
 	        //Receive a reply from the server
@@ -373,6 +413,27 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	printf("===================================================================\n\n\n");
         puts(server_reply);
 printf("\n\n\n===================================================================\n\n\n");
+	selection = true;
+break;
+
+}
+	if(atoi(&ans[0]) == 2){
+	char* withdrawal;
+	printf(" Credit Balance Selected - > Send savings Withdrawal variable to server \n");
+	printf("How much would you like to withdraw : ");
+	scanf("%s" ,message);
+	sprintf(buf, "WITHDRAWCREDIT %s", message);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+	printf("\n\n\n===================================================================\n\n\n");
 	selection = true;
 break;
 
@@ -391,7 +452,57 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	scanf("%s" ,message);
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
-	sprintf(buf, "CREDITSAV %s", message);
+	sprintf(buf, "DEPOSITSAV %s", message);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n\n\n");
+	selection = true;
+break;
+
+}
+
+if(atoi(&ans[0]) == 2){
+	char* deposit;
+	printf(" Savings Balance Selected - > Send savings Credit variable to server \n");
+	printf("How much would you like to withdraw : ");
+	//fgets(message,1000,stdin);
+	scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "DEPOSITLOAN %s", message);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n\n\n");
+	selection = true;
+break;
+
+}
+
+if(atoi(&ans[0]) == 3){
+	char* deposit;
+	printf(" Savings Balance Selected - > Send savings Credit variable to server \n");
+	printf("How much would you like to withdraw : ");
+	//fgets(message,1000,stdin);
+	scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "DEPOSITCREDIT %s", message);
 	write(sockfd , buf , strlen(buf));
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
