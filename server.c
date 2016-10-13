@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 FILE * clientDetails;
 FILE * toAuthenticate;
@@ -49,7 +50,28 @@ char onlineClose[14];
 char onlineOpen2[14];
 char onlineClose2[14];
 char onlineClose3[14];
+bool correctAc = false;
 
+  //TRANSACTIONS STRUCT
+ typedef struct Transactions{
+	int fromAccount;
+	int toAccount;
+	float amount;
+	char transType[15];
+  }Transactions; 
+Transactions* transactions = NULL;
+	int tranSize = 0;
+	
+void append_transaction(int toAcc, int fromAcc, float amount, char* transtype)
+	{
+		int pos = tranSize;
+		transactions = realloc(transactions, (tranSize + 1) * sizeof(Transactions));
+		tranSize++;
+                transactions[pos].fromAccount = fromAcc;
+		transactions[pos].toAccount = toAcc;
+		transactions[pos].amount = amount;
+		strcpy(transactions[pos].transType , transtype);
+	}
   //AUTH STRUCT
   struct Clients {
     char username[15];
@@ -414,7 +436,12 @@ tracker++;
 	float curr = strtod((pin),&store);
 	float calc = clientsinfo[saveTracker].figs.close -= curr; 
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
-	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);	
+	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+	append_transaction(0, atoi(onlineAc1), curr, "Withdraw");
+	//printf("CHECKING %f" , transactions[0].amount);
+	printf("CHECKING %s" , transactions[0].transType);
+
+	
 	write(sock , buf , strlen(buf));////////////////////////////
 	
 }
@@ -424,6 +451,7 @@ tracker++;
 	float calc = clientsinfo[saveTracker].figs3.close -= curr; 
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);	
+	append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
 	write(sock , buf , strlen(buf));////////////////////////////
 	
 }
@@ -435,6 +463,7 @@ if(strcmp(username, "DEPOSITSAV") == 0) {
 	float calc = clientsinfo[saveTracker].figs.close += curr; 
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
+	append_transaction(atoi(onlineAc1), 0, curr, "Deposit");
 	write(sock , buf , strlen(buf));////////////////////////////	
 }
 if(strcmp(username, "DEPOSITLOAN") == 0) {
@@ -443,6 +472,7 @@ if(strcmp(username, "DEPOSITLOAN") == 0) {
 	float calc = clientsinfo[saveTracker].figs2.close += curr; 
 	sprintf(onlineClose2, "%.2lf", clientsinfo[saveTracker].figs2.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
+	append_transaction(0, atoi(onlineAc2), curr, "Deposit");
 	 write(sock , buf , strlen(buf));////////////////////////////	
 }
 if(strcmp(username, "DEPOSITCREDIT") == 0) {
@@ -451,6 +481,7 @@ if(strcmp(username, "DEPOSITCREDIT") == 0) {
 	float calc = clientsinfo[saveTracker].figs3.close += curr; 
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
+	append_transaction(0, atoi(onlineAc3), curr, "Deposit");
 	 write(sock , buf , strlen(buf));////////////////////////////	
 }
 
@@ -461,22 +492,148 @@ if(strcmp(username, "TRANSFERN") == 0) {
 	sprintf(saveAcNum,"%s", pin);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 }
-if(strcmp(username, "AMOUNT") == 0){
-for(int i = 0; i<24; i++){
-if(accounts[i].accNum == atoi(saveAcNum)){
-accounts[i].closeBal+=atoi(pin);
+if(strcmp(username, "AMOUNTD") == 0){
+for(int i = 0; i<10; i++){
+if(clientsinfo[i].account1 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs.close += curr; 
+sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+printf("%s", pin);
+correctAc = true;
 printf("WOO HOO TRANSFER BABY");
-
+}
+if(clientsinfo[i].account2 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs2.close += curr;
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );  
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account3 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs3.close += curr; 
+sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account1 == atoi(onlineAc1)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs.close-=curr;
+sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+}
+}
+if(correctAc == false){
+write(sock, "No such account number", strlen("No such account number")+1);
 }
 
+if(correctAc == true){
+sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);	
+//append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
+write(sock , buf , strlen(buf)+1);////////////////////////////
 }
-sprintf(buf, "\n\n You send $%s to account number %s",pin, saveAcNum);
-	write(sock , buf , strlen(buf)+1);////////////////////////////
-
 }
 
 
+if(strcmp(username, "AMOUNTL") == 0){
+for(int i = 0; i<10; i++){
+if(clientsinfo[i].account1 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs.close += curr; 
+sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account2 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs2.close += curr;
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );  
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account3 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs3.close += curr; 
+sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account2 == atoi(onlineAc2)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs2.close-=curr;
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
+}
+}
+if(correctAc == false){
+write(sock, "No such account number", strlen("No such account number")+1);
+}
 
+if(correctAc == true){
+sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);	
+//append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
+write(sock , buf , strlen(buf)+1);////////////////////////////
+}
+}
+
+
+if(strcmp(username, "AMOUNTC") == 0){
+for(int i = 0; i<10; i++){
+if(clientsinfo[i].account1 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs.close += curr; 
+sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account2 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs2.close += curr;
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );  
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account3 == atoi(saveAcNum)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs3.close += curr; 
+sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+printf("%s", pin);
+correctAc = true;
+printf("WOO HOO TRANSFER BABY");
+}
+if(clientsinfo[i].account3 == atoi(onlineAc3)){
+char* store;
+float curr = strtod((pin),&store);
+clientsinfo[i].figs3.close-=curr;
+sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+}
+}
+if(correctAc == false){
+write(sock, "No such account number", strlen("No such account number")+1);
+}
+
+if(correctAc == true){
+sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);	
+//append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
+write(sock , buf , strlen(buf)+1);////////////////////////////
+}
+}
 
 
 else{

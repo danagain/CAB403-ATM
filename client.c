@@ -24,7 +24,6 @@ bool login = false;
 char* temp;
 bool selection = false;
 char buf[1000];
-char transactions[10000];
 bool account1 = false;
 bool account2 = false;
 bool account3 = false;
@@ -538,12 +537,99 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
             puts("recv failed");
             break;
         }   
+
+	if(strcmp(server_reply, "No such account number") == 0) {
+	puts(server_reply);
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+		
+
+}
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
 printf("\n\n\n===================================================================\n\n\n");
 	scanf("%s" ,trans);
-	sprintf(buf, "AMOUNT %s", trans);
+	sprintf(buf, "AMOUNTD %s", trans);
+	write(sockfd,buf,strlen(buf)+1);
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+       }   
+	puts(server_reply);
+	selection = true;
+break;
+
+}
+if(atoi(&ans[0]) == 2){
+	char* deposit;
+	printf(" LOAN Balance Selected - > Send savings Transfer variable to server \n");
+	printf("Please enter the account number you wish to transfer too : ");
+	//fgets(message,1000,stdin);
+	scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "TRANSFERN %s", message);
+	write(sockfd , buf , strlen(buf)+1);
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+
+	if(strcmp(server_reply, "No such account number") == 0) {
+	puts(server_reply);
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+		
+
+}
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n\n\n");
+	scanf("%s" ,trans);
+	sprintf(buf, "AMOUNTL %s", trans);
+	write(sockfd,buf,strlen(buf)+1);
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+       }   
+	puts(server_reply);
+	selection = true;
+break;
+
+}
+if(atoi(&ans[0]) == 3){
+	char* deposit;
+	printf(" CREDIT Balance Selected - > Send savings Transfer variable to server \n");
+	printf("Please enter the account number you wish to transfer too : ");
+	//fgets(message,1000,stdin);
+	scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "TRANSFERN %s", message);
+	write(sockfd , buf , strlen(buf)+1);
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }   
+
+	if(strcmp(server_reply, "No such account number") == 0) {
+	puts(server_reply);
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+		
+
+}
+       // puts("Server reply :");
+	printf("===================================================================\n\n\n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n\n\n");
+	scanf("%s" ,trans);
+	sprintf(buf, "AMOUNTC %s", trans);
 	write(sockfd,buf,strlen(buf)+1);
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
