@@ -5,14 +5,14 @@
 
 
 #include <arpa/inet.h>
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <errno.h> 
-#include <string.h> 
-#include <sys/types.h> 
-#include <netinet/in.h> 
-#include <sys/socket.h> 
-#include <sys/wait.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -21,36 +21,8 @@
 FILE * clientDetails;
 FILE * toAuthenticate;
 FILE * accountsFile;
-char inClientBuffer[64];
-char outClientBuffer[1024];
-char usernameSaved[15];
-int pin;
-int clientNum;
-bool login = false;
-char detailsname[15];
-char detailssurname[15];
-int detailsaccount1;
-int detailsaccount2;
-int detailsaccount3;
-int detailsclientnum;
-int accountNumber;
-float openingBalance;
-char saveAcNum[20];
-float closingBalance;
-int saveTracker;
-char onlineCnum[14];
-char onlineAc1[14];
-char onlineAc2[14];
-char onlineAc3[14];
-char onlineName[14];
-char onlineSurname[14];
-int usersClientNum;
-char onlineOpen[14];
-char onlineClose[14];
-char onlineOpen2[14];
-char onlineClose2[14];
-char onlineClose3[14];
 bool correctAc = false;
+
 
   //TRANSACTIONS STRUCT
  typedef struct Transactions{
@@ -58,10 +30,10 @@ bool correctAc = false;
 	int toAccount;
 	float amount;
 	char transType[15];
-  }Transactions; 
+  }Transactions;
 Transactions* transactions = NULL;
 	int tranSize = 0;
-	
+
 void append_transaction(int toAcc, int fromAcc, float amount, char* transtype)
 	{
 		int pos = tranSize;
@@ -118,6 +90,9 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype)
 	#define RETURNED_ERROR -1
 
 void fillClients(){
+char usernameSaved[15];
+int pin;
+int clientNum;
 //Variables
 toAuthenticate = fopen("Authentication.txt", "r");
 int cnt = 0;
@@ -150,6 +125,12 @@ void fillClientsInfo(){
   char c;
   int chk;
   int cnt2 = 0;
+char detailsname[15];
+char detailssurname[15];
+int detailsaccount1;
+int detailsaccount2;
+int detailsaccount3;
+int detailsclientnum;
 clientDetails = fopen("Client_Details.txt", "r");
 do{
     c = fgetc(clientDetails);
@@ -161,7 +142,7 @@ do{
     //puts(str);
     chk = sscanf(str, "%s %s %d %d, %d, %d", detailsname, detailssurname, & detailsclientnum, & detailsaccount1, & detailsaccount2, & detailsaccount3);
 	if(chk < 4 ){
-		break;	
+		break;
 		}
     if (chk == 4) {
       for (int i = 0; i < 15; i++) {
@@ -204,6 +185,9 @@ do{
 void fillAccounts(){
 int cnt3 = 0;
 char x;
+int accountNumber;
+float openingBalance;
+float closingBalance;
 accountsFile = fopen("Accounts.txt", "r");
 	char str3[100];
 	//skipping first line of accounts file
@@ -263,7 +247,7 @@ void Send_Array_Data(int socket_id, char* array) {
 		simpleArray[i] = i * i;
 	}
 
-	uint16_t statistics;  
+	uint16_t statistics;
 	for (i = 0; i < ARRAY_SIZE; i++) {
 		statistics = htons(simpleArray[i]);
 		send(socket_id, &statistics, sizeof(uint16_t), 0);
@@ -273,6 +257,26 @@ void Send_Array_Data(int socket_id, char* array) {
 
 void *client_handler(void *socket_desc)
 {
+char inClientBuffer[64];
+char outClientBuffer[1024];
+
+bool login = false;
+
+char saveAcNum[20];
+int saveTracker;
+char onlineCnum[14];
+char onlineAc1[14];
+char onlineAc2[14];
+char onlineAc3[14];
+char onlineName[14];
+char onlineSurname[14];
+int usersClientNum;
+char onlineOpen[14];
+char onlineClose[14];
+char onlineOpen2[14];
+char onlineClose2[14];
+char onlineClose3[14];
+
     //Get the socket descriptor
 	puts("thread handling");
     int sock = *(int*)socket_desc;
@@ -310,7 +314,7 @@ void *client_handler(void *socket_desc)
       printf("%i\n\n", intval);
 	int tracker = 0;
 
-	
+
 	 for (int i = 1; i < 11; i++) {
         match = 0;
         for (int k = 0; k < intval; k++) {
@@ -350,7 +354,7 @@ void *client_handler(void *socket_desc)
 						if(clientsinfo[tracker].account2 == accounts[j].accNum){
 						clientsinfo[tracker].figs2.open = accounts[j].openBal;
 						clientsinfo[tracker].figs2.close = accounts[j].closeBal;
-						
+
 }
 }
 
@@ -395,11 +399,7 @@ tracker++;
         send(sock, incorrect, strlen(incorrect) +1, 0);
         close(sock);
       }
-	
 
-	if(login == true){
-	
-	}
 
 
 
@@ -416,73 +416,73 @@ tracker++;
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
 
 	 write(sock , buf , strlen(buf));////////////////////////////
-	
+
 }
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "LOAN") == 0) {
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
 	 write(sock , buf , strlen(buf));////////////////////////////
-	
+
 }
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "CREDIT") == 0) {
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
 	 write(sock , buf , strlen(buf));////////////////////////////
-	
+
 }
 
 	if(strcmp(username, "WITHDRAWSAV") == 0) {
 	char* store;
 	float curr = strtod((pin),&store);
-	float calc = clientsinfo[saveTracker].figs.close -= curr; 
+	float calc = clientsinfo[saveTracker].figs.close -= curr;
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
 	append_transaction(0, atoi(onlineAc1), curr, "Withdraw");
 	//printf("CHECKING %f" , transactions[0].amount);
 	printf("CHECKING %s" , transactions[0].transType);
 
-	
+
 	write(sock , buf , strlen(buf));////////////////////////////
-	
+
 }
 	if(strcmp(username, "WITHDRAWCREDIT") == 0) {
 	char* store;
 	float curr = strtod((pin),&store);
-	float calc = clientsinfo[saveTracker].figs3.close -= curr; 
+	float calc = clientsinfo[saveTracker].figs3.close -= curr;
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
-	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);	
+	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
 	append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
 	write(sock , buf , strlen(buf));////////////////////////////
-	
+
 }
 
 
 if(strcmp(username, "DEPOSITSAV") == 0) {
 	char* store;
 	float curr = strtod((pin),&store);
-	float calc = clientsinfo[saveTracker].figs.close += curr; 
+	float calc = clientsinfo[saveTracker].figs.close += curr;
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
 	append_transaction(atoi(onlineAc1), 0, curr, "Deposit");
-	write(sock , buf , strlen(buf));////////////////////////////	
+	write(sock , buf , strlen(buf));////////////////////////////
 }
 if(strcmp(username, "DEPOSITLOAN") == 0) {
 	char* store;
 	float curr = strtod((pin),&store);
-	float calc = clientsinfo[saveTracker].figs2.close += curr; 
+	float calc = clientsinfo[saveTracker].figs2.close += curr;
 	sprintf(onlineClose2, "%.2lf", clientsinfo[saveTracker].figs2.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
 	append_transaction(0, atoi(onlineAc2), curr, "Deposit");
-	 write(sock , buf , strlen(buf));////////////////////////////	
+	 write(sock , buf , strlen(buf));////////////////////////////
 }
 if(strcmp(username, "DEPOSITCREDIT") == 0) {
 	char* store;
 	float curr = strtod((pin),&store);
-	float calc = clientsinfo[saveTracker].figs3.close += curr; 
+	float calc = clientsinfo[saveTracker].figs3.close += curr;
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
 	append_transaction(0, atoi(onlineAc3), curr, "Deposit");
-	 write(sock , buf , strlen(buf));////////////////////////////	
+	 write(sock , buf , strlen(buf));////////////////////////////
 }
 
 
@@ -497,9 +497,11 @@ for(int i = 0; i<10; i++){
 if(clientsinfo[i].account1 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
-clientsinfo[i].figs.close += curr; 
+clientsinfo[i].figs.close += curr;
 sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
 printf("%s", pin);
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Trbsfdf", atoi(saveAcNum), atoi(onlineAc1), curr);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
 }
@@ -507,7 +509,7 @@ if(clientsinfo[i].account2 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs2.close += curr;
-sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );  
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -515,12 +517,13 @@ printf("WOO HOO TRANSFER BABY");
 if(clientsinfo[i].account3 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
-clientsinfo[i].figs3.close += curr; 
+clientsinfo[i].figs3.close += curr;
 sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
 }
+//remove money
 if(clientsinfo[i].account1 == atoi(onlineAc1)){
 char* store;
 float curr = strtod((pin),&store);
@@ -533,8 +536,7 @@ write(sock, "No such account number", strlen("No such account number")+1);
 }
 
 if(correctAc == true){
-sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);	
-//append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
+sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);
 write(sock , buf , strlen(buf)+1);////////////////////////////
 }
 }
@@ -545,7 +547,7 @@ for(int i = 0; i<10; i++){
 if(clientsinfo[i].account1 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
-clientsinfo[i].figs.close += curr; 
+clientsinfo[i].figs.close += curr;
 sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
 printf("%s", pin);
 correctAc = true;
@@ -555,7 +557,7 @@ if(clientsinfo[i].account2 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs2.close += curr;
-sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );  
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -563,7 +565,7 @@ printf("WOO HOO TRANSFER BABY");
 if(clientsinfo[i].account3 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
-clientsinfo[i].figs3.close += curr; 
+clientsinfo[i].figs3.close += curr;
 sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
 printf("%s", pin);
 correctAc = true;
@@ -581,11 +583,12 @@ write(sock, "No such account number", strlen("No such account number")+1);
 }
 
 if(correctAc == true){
-sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);	
+sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);
 //append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
 write(sock , buf , strlen(buf)+1);////////////////////////////
 }
 }
+
 
 
 if(strcmp(username, "AMOUNTC") == 0){
@@ -593,7 +596,7 @@ for(int i = 0; i<10; i++){
 if(clientsinfo[i].account1 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
-clientsinfo[i].figs.close += curr; 
+clientsinfo[i].figs.close += curr;
 sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
 printf("%s", pin);
 correctAc = true;
@@ -603,7 +606,7 @@ if(clientsinfo[i].account2 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs2.close += curr;
-sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );  
+sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -611,7 +614,7 @@ printf("WOO HOO TRANSFER BABY");
 if(clientsinfo[i].account3 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
-clientsinfo[i].figs3.close += curr; 
+clientsinfo[i].figs3.close += curr;
 sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
 printf("%s", pin);
 correctAc = true;
@@ -629,7 +632,7 @@ write(sock, "No such account number", strlen("No such account number")+1);
 }
 
 if(correctAc == true){
-sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);	
+sprintf(buf, "\n\n You sent $%s to account number %s",pin, saveAcNum);
 //append_transaction(0, atoi(onlineAc3), curr, "Withdraw");
 write(sock , buf , strlen(buf)+1);////////////////////////////
 }
@@ -637,11 +640,12 @@ write(sock , buf , strlen(buf)+1);////////////////////////////
 
 
 else{
-	 write(sock , "" , strlen("")+1);}
+	 write(sock , "" , strlen("")+1);
+}
        // write(sock , client_message , strlen(client_message)+1); }
 	//memset(client_message,"\n",sizeof(client_message));
     }
-     
+
     if(read_size == 0)
     {
         puts("Client disconnected");
@@ -651,11 +655,12 @@ else{
     {
         perror("recv failed");
     }
-         
+
     //Free the socket pointer
     free(socket_desc);
-     
+
     return 0;
+
 }
 int main(int argc, char *argv[]) {
 
@@ -702,7 +707,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	printf("server starts listnening ...\n");
-	
+
 	//Fills the clients structre , username , pin , clientNum
 	fillClients();
 	//Fills the clients Info structure
@@ -723,10 +728,10 @@ int main(int argc, char *argv[]) {
 			inet_ntoa(their_addr.sin_addr));
 		newestSock = malloc(1);
 		*newestSock = new_fd;
-		
+
 
 		//Create a thread to accept client
-				
+
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
 		pthread_create(&client_thread, &attr, client_handler,(void*) newestSock);
@@ -741,6 +746,6 @@ int main(int argc, char *argv[]) {
 
 	}
 	return 0;
- 
+
 }
 
