@@ -14,6 +14,7 @@ char username[30];
 char client_pin[15];
 char input[15];
 char ans[15];
+char ans2[15];
 char withdraw[15];
 char deposit[15];
 char outServer[64];
@@ -85,9 +86,94 @@ void interface(){
 
 }
 
+char* transTo(char* ac1, char* ac2, char* ac3){
+if(atoi(input) == 4 && atoi(ans) == 1){
+printf("\n\nSelect account type");
+
+//Account 1
+if(atoi(ac2) > 0 && atoi(ac2) % 12 == 0){
+printf("\n<1> Loan Account");
+account2 = true;
+}
+if(atoi(ac2) > 0 && atoi(ac2) % 13 == 0){
+printf("\n<1> Credit Card Account");
+account3 = true;
+}	
+
+//Account 2
+if(atoi(ac3) > 0 && atoi(ac3) % 12 == 0){
+printf("\n<2> Loan Account");
+account2 = true;
+}
+if(atoi(ac3) > 0 && atoi(ac3) % 13 == 0){
+printf("\n<2> Credit Card Account");
+account3 = true;
+}
+
+printf("\n<3> External Account");
+}
+
+if(atoi(input) == 4 && atoi(ans) == 3){
+printf("\n\nSelect account type");
+
+//Account 1
+if(atoi(ac1) > 0 && atoi(ac1) % 12 == 0){
+printf("\n<1> Loan Account");
+account2 = true;
+}
+if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
+printf("\n<1> Savings Card Account");
+account3 = true;
+}	
+
+//Account 2
+if(atoi(ac2) > 0 && atoi(ac2) % 12 == 0){
+printf("\n<2> Loan Account");
+account2 = true;
+}
+if(atoi(ac2) > 0 && atoi(ac2) % 11 == 0){
+printf("\n<2> Savings Card Account");
+account1 = true;
+}
+
+printf("\n<3> External Account");
+}
+
+
+if(atoi(input) == 4 && atoi(ans) == 2){
+printf("\n\nSelect account type");
+
+//Account 1
+if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
+printf("\n<1> Savings Account");
+account1 = true;
+}
+if(atoi(ac1) > 0 && atoi(ac1) % 13 == 0){
+printf("\n<1> Credit Card Account");
+account3 = true;
+}	
+
+//Account 2
+if(atoi(ac3) > 0 && atoi(ac3) % 11 == 0){
+printf("\n<2> Savings Account");
+account1 = true;
+}
+if(atoi(ac3) > 0 && atoi(ac3) % 13 == 0){
+printf("\n<2> Credit Card Account");
+account3 = true;
+}
+
+printf("\n<3> External Account");
+}
+printf("\n\nSelect Account To Transfer To (E/e to exit):");
+scanf("%s",ans2);
+
+return ans2;
+}
+
 char* whatAccounts(char* ac1, char* ac2, char* ac3){
 
-if(atoi(input) == 1 || atoi(input) == 3 || atoi(input) == 4 || atoi(input) == 5){
+if(atoi(input) == 1 || atoi(input) == 3 || atoi(input) == 5){
 printf("\n\nSelect account type");
 //ACCOUNT 1
 if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
@@ -132,7 +218,7 @@ printf("\nEnter your selection (E/e to exit) - ");
 }
 
 //WITHDRAW OPTION - NO LOAN ACCOUNT
-if(atoi(input) == 2){
+if(atoi(input) == 2 || atoi(input) == 4){
 printf("\n\nSelect account type");
 //ACCOUNT 1
 if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
@@ -164,7 +250,12 @@ if(atoi(ac3) > 0 && atoi(ac3) % 13 == 0){
 printf("\n<2> Credit Card Account");
 account3 = true;
 }
+if(atoi(input) == 1 || atoi(input) == 2 || atoi(input) == 3){
 printf("\nEnter your selection (E/e to exit) - ");
+}
+if(atoi(input) == 4){
+printf("\nSelect Account To Transfer From (E/e to exit) -");
+}
 }
 
 
@@ -472,6 +563,7 @@ break;
 
 
 while(atoi(&input[0]) == 3) {
+printf("\nThe Maximum Daily Limit is $1000.00\n");
 whatAccounts(clientAc1, clientAc2, clientAc3);
 
 	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
@@ -498,6 +590,21 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
+	while(strcmp(server_reply, "You cannot deposit more than $1000.00 in a single transaction!") == 0){
+			printf("\nEnter the amount to deposit (E/e) to exit : $");
+			scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "DEPOSITSAV %s", message);
+	write(sockfd , buf , strlen(buf)+1);
+	        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }  
+	printf("\n\n\n===================================================================\n\n\n"); 
+	puts(server_reply);
+	}
 printf("\n\n\n===================================================================\n\n\n");
 	selection = true;
 break;
@@ -523,6 +630,21 @@ if(atoi(&ans[0]) == 2 && account2 == false && account3 == true){
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
+while(strcmp(server_reply, "You cannot deposit more than $1000.00 in a single transaction!") == 0){
+			printf("\nEnter the amount to deposit (E/e) to exit : $");
+			scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "DEPOSITCREDIT %s", message);
+	write(sockfd , buf , strlen(buf)+1);
+	        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }  
+	printf("\n\n\n===================================================================\n\n\n"); 
+	puts(server_reply);
+	}
 printf("\n\n\n===================================================================\n\n\n");
 	selection = true;
 break;
@@ -548,6 +670,21 @@ if(atoi(&ans[0]) == 2 && account2 == true){
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
+while(strcmp(server_reply, "You cannot deposit more than $1000.00 in a single transaction!") == 0){
+			printf("\nEnter the amount to deposit (E/e) to exit : $");
+			scanf("%s" ,message);
+	//fgets(message,1000,stdin);
+	//sscanf(message, "%s" , withdrawal);
+	sprintf(buf, "DEPOSITLOAN %s", message);
+	write(sockfd , buf , strlen(buf)+1);
+	        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }  
+	printf("\n\n\n===================================================================\n\n\n"); 
+	puts(server_reply);
+	}
 printf("\n\n\n===================================================================\n\n\n");
 	selection = true;
 break;
@@ -583,7 +720,7 @@ break;
 while(atoi(&input[0]) == 4) {
 whatAccounts(clientAc1, clientAc2, clientAc3);
 
-	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
+	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0 || strcmp(ans2,"e") == 0 || strcmp(ans2,"E") == 0){
 	selection = true;
 	break;
 
@@ -592,8 +729,8 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	char* deposit;
 	printf(" Savings Balance Selected - > Send savings Transfer variable to server \n");
 	
-	printf("===================================================================\n\n\n");
-        printf("Please enter the account number you wish to transfer too ");
+	transTo(clientAc1, clientAc2, clientAc3);
+	if(atoi(&ans2[0]) == 3){
 //printf("\n\n\n===================================================================\n\n\n");
 
 	printf("-->");
@@ -632,49 +769,10 @@ printf("\n===================================================================\n\
 	puts(server_reply);
 	selection = true;
 break;
+}//end if ans2[0] == 3
 
 }
 if(atoi(&ans[0]) == 2){
-	char* deposit;
-	printf(" LOAN Balance Selected - > Send savings Transfer variable to server \n");
-	printf("Please enter the account number you wish to transfer too : ");
-	//fgets(message,1000,stdin);
-	scanf("%s" ,message);
-	//fgets(message,1000,stdin);
-	//sscanf(message, "%s" , withdrawal);
-	sprintf(buf, "TRANSFERN %s", message);
-	write(sockfd , buf , strlen(buf)+1);
-	        //Receive a reply from the server
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            break;
-        }   
-
-	if(strcmp(server_reply, "No such account number") == 0) {
-	puts(server_reply);
-	whatAccounts(clientAc1, clientAc2, clientAc3);
-		
-
-}
-       // puts("Server reply :");
-	printf("===================================================================\n\n\n");
-        puts(server_reply);
-printf("===================================================================\n\n");
-	scanf("%s" ,trans);
-	sprintf(buf, "AMOUNTL %s", trans);
-	write(sockfd,buf,strlen(buf)+1);
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            break;
-       }   
-	puts(server_reply);
-	selection = true;
-break;
-
-}
-if(atoi(&ans[0]) == 3){
 	char* deposit;
 	printf(" CREDIT Balance Selected - > Send savings Transfer variable to server \n");
 	printf("Please enter the account number you wish to transfer too : ");
