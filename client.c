@@ -431,7 +431,7 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	printf("\n\nHow much would you like to WITHDRAW: ");
 	scanf("%s" ,message);
 	sprintf(buf, "WITHDRAWSAV %s", message);
-	write(sockfd , buf , strlen(buf));
+	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
@@ -452,7 +452,7 @@ break;
 	printf("\n\nHow much would you like to WITHDRAW: ");
 	scanf("%s" ,message);
 	sprintf(buf, "WITHDRAWCREDIT %s", message);
-	write(sockfd , buf , strlen(buf));
+	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
@@ -488,7 +488,7 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITSAV %s", message);
-	write(sockfd , buf , strlen(buf));
+	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
@@ -513,7 +513,7 @@ if(atoi(&ans[0]) == 2 && account2 == false && account3 == true){
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITCREDIT %s", message);
-	write(sockfd , buf , strlen(buf));
+	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
@@ -538,7 +538,7 @@ if(atoi(&ans[0]) == 2 && account2 == true){
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITLOAN %s", message);
-	write(sockfd , buf , strlen(buf));
+	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
@@ -563,7 +563,7 @@ if(atoi(&ans[0]) == 3 && account3 == true){
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITCREDIT %s", message);
-	write(sockfd , buf , strlen(buf));
+	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
         {
@@ -591,7 +591,12 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	if(atoi(&ans[0]) == 1){
 	char* deposit;
 	printf(" Savings Balance Selected - > Send savings Transfer variable to server \n");
-	printf("Please enter the account number you wish to transfer too : ");
+	
+	printf("===================================================================\n\n\n");
+        printf("Please enter the account number you wish to transfer too ");
+//printf("\n\n\n===================================================================\n\n\n");
+
+	printf("-->");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
 	//fgets(message,1000,stdin);
@@ -606,6 +611,7 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
         }   
 
 	if(strcmp(server_reply, "No such account number") == 0) {
+	clrscr();
 	puts(server_reply);
 	whatAccounts(clientAc1, clientAc2, clientAc3);
 		
@@ -614,7 +620,7 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
-printf("\n\n\n===================================================================\n\n\n");
+printf("\n===================================================================\n\n");
 	scanf("%s" ,trans);
 	sprintf(buf, "AMOUNTD %s", trans);
 	write(sockfd,buf,strlen(buf)+1);
@@ -654,7 +660,7 @@ if(atoi(&ans[0]) == 2){
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
-printf("\n\n\n===================================================================\n\n\n");
+printf("===================================================================\n\n");
 	scanf("%s" ,trans);
 	sprintf(buf, "AMOUNTL %s", trans);
 	write(sockfd,buf,strlen(buf)+1);
@@ -694,7 +700,7 @@ if(atoi(&ans[0]) == 3){
        // puts("Server reply :");
 	printf("===================================================================\n\n\n");
         puts(server_reply);
-printf("\n\n\n===================================================================\n\n\n");
+printf("===================================================================\n\n");
 	scanf("%s" ,trans);
 	sprintf(buf, "AMOUNTC %s", trans);
 	write(sockfd,buf,strlen(buf)+1);
@@ -710,6 +716,103 @@ break;
 }
 }
 
+while(atoi(&input[0]) == 5) {
+whatAccounts(clientAc1, clientAc2, clientAc3);
+
+	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
+	selection = true;
+	break;
+
+}
+	if(atoi(&ans[0]) == 1){
+	char* deposit;
+	printf(" Savings Transactions Selected - > Send savings trans variable to server \n");
+	sprintf(buf, "TRANSACTIONS %s", clientAc1);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }   
+	printf("===================================================================\n");
+
+        puts(server_reply);
+printf("===================================================================\n");
+	selection = true;
+break;
+
+}
+
+if(atoi(&ans[0]) == 2 && account2 == false && account3 == true){
+	char* deposit;
+	printf(" Savings Transactions Selected - > Send savings trans variable to server \n");
+	sprintf(buf, "TRANSACTIONS %s", clientAc3);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }   
+	printf("===================================================================\n");
+	
+        puts(server_reply);
+printf("===================================================================\n");
+	selection = true;
+break;
+
+
+}
+
+if(atoi(&ans[0]) == 2 && account2 == true){
+	char* deposit;
+	printf(" Savings Transactions Selected - > Send savings trans variable to server \n");
+	sprintf(buf, "TRANSACTIONS %s", clientAc2);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }   
+	printf("===================================================================\n");
+
+        puts(server_reply);
+printf("\n\n\n===================================================================\n");
+	selection = true;
+break;
+
+
+}
+
+if(atoi(&ans[0]) == 3 && account3 == true){
+	char* deposit;
+	printf(" Savings Transactions Selected - > Send savings trans variable to server \n");
+	sprintf(buf, "TRANSACTIONS %s", clientAc3);
+	write(sockfd , buf , strlen(buf));
+	        //Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }   
+	printf("===================================================================\n");
+	printf("Transaction \t Type \t       Amount \n");
+        puts(server_reply);
+printf("\n\n\n===================================================================\n");
+	selection = true;
+break;
+
+
+
+}
+
+
+
+
+
+}
  
        // Send some data
       //  if( send(sockfd , message , strlen(message)+1 , 0) < 0)
