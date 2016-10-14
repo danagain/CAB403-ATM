@@ -21,7 +21,6 @@
 FILE * clientDetails;
 FILE * toAuthenticate;
 FILE * accountsFile;
-bool correctAc = false;
 
 
   //TRANSACTIONS STRUCT
@@ -261,7 +260,7 @@ char inClientBuffer[64];
 char outClientBuffer[1024];
 
 bool login = false;
-
+bool correctAc = false;
 char saveAcNum[20];
 int saveTracker;
 char onlineCnum[14];
@@ -413,6 +412,12 @@ tracker++;
 
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "SAVINGS") == 0) {
+	// loop to update client balance from struct
+	for(int i = 0 ; i < 10; i++){
+	if(clientsinfo[i].account1 == atoi(onlineAc1)){
+	sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+}
+}
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
 
 	 write(sock , buf , strlen(buf));////////////////////////////
@@ -420,12 +425,24 @@ tracker++;
 }
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "LOAN") == 0) {
+	// loop to update client balance from struct
+	for(int i = 0 ; i < 10; i++){
+	if(clientsinfo[i].account2 == atoi(onlineAc2)){
+	sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
+}
+}
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc2 , onlineClose2);
 	 write(sock , buf , strlen(buf));////////////////////////////
 
 }
 
 	if(strcmp(username, "BALANCE") == 0 && strcmp(pin, "CREDIT") == 0) {
+	// loop to update client balance from struct
+	for(int i = 0 ; i < 10; i++){
+	if(clientsinfo[i].account3 == atoi(onlineAc3)){
+	sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+}
+}
 	sprintf(buf, "\n\n %s %s Your balance for account %s is  $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
 	 write(sock , buf , strlen(buf));////////////////////////////
 
@@ -483,6 +500,9 @@ if(strcmp(username, "DEPOSITCREDIT") == 0) {
 	sprintf(buf, "\n\n %s %s Your balance for account %s after depositing is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
 	append_transaction(0, atoi(onlineAc3), curr, "Deposit");
 	 write(sock , buf , strlen(buf));////////////////////////////
+	for(int i = 0; i < sizeof(transactions);i++){
+		printf("SATAN");
+}
 }
 
 
@@ -495,13 +515,13 @@ if(strcmp(username, "TRANSFERN") == 0) {
 if(strcmp(username, "AMOUNTD") == 0){
 for(int i = 0; i<10; i++){
 if(clientsinfo[i].account1 == atoi(saveAcNum)){
+printf("SAVED ACCOUNT NUMBER %s" , saveAcNum);
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs.close += curr;
-sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
-printf("%s", pin);
+// APPEND TRANSACTION
 append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
-printf("to %d from %d amount %f type Trbsfdf", atoi(saveAcNum), atoi(onlineAc1), curr);
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
 }
@@ -509,7 +529,9 @@ if(clientsinfo[i].account2 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs2.close += curr;
-sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -518,7 +540,9 @@ if(clientsinfo[i].account3 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs3.close += curr;
-sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -548,7 +572,9 @@ if(clientsinfo[i].account1 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs.close += curr;
-sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -557,7 +583,9 @@ if(clientsinfo[i].account2 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs2.close += curr;
-sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -566,7 +594,9 @@ if(clientsinfo[i].account3 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs3.close += curr;
-sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -597,7 +627,9 @@ if(clientsinfo[i].account1 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs.close += curr;
-sprintf(onlineClose, "%.2lf", clientsinfo[i].figs.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -606,7 +638,9 @@ if(clientsinfo[i].account2 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs2.close += curr;
-sprintf(onlineClose2, "%.2lf", clientsinfo[i].figs2.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
@@ -615,11 +649,14 @@ if(clientsinfo[i].account3 == atoi(saveAcNum)){
 char* store;
 float curr = strtod((pin),&store);
 clientsinfo[i].figs3.close += curr;
-sprintf(onlineClose3, "%.2lf", clientsinfo[i].figs3.close );
+// APPEND TRANSACTION
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", pin);
 correctAc = true;
 printf("WOO HOO TRANSFER BABY");
 }
+//remove money - ok to update onlineClose
 if(clientsinfo[i].account3 == atoi(onlineAc3)){
 char* store;
 float curr = strtod((pin),&store);
