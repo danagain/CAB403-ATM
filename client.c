@@ -168,7 +168,43 @@ void interface(){
 }
 
 
+void invalidAccount(char* reply, char* msg, char* buf, int sock){
+		while(strcmp("Invalid Account Number - Please try again -", reply) == 0 ) { 
+	scanf("%s", msg);
+	sprintf(buf, "SEXTERNAL %s", msg);
+	write(sock, buf, strlen(buf) + 1 );
+	//Receive a reply from the server
+        if( recv(sock , reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(reply);
+	}
+	
+	//If client has no extra accounts, First option will be EXTERNAL
+	//If server replies asking for an amount to transfer to external account num
+	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", reply) == 0 ) {
+	//save amount to send to buf
+	extTranSav(buf, msg);
+	//Send the userinput to server
+	write(sock, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+        if( recv(sock , reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(reply);
+	}
+	//while the server is sending back an incorrect client num input
 
+
+
+
+}
 
 char* transTo(char* ac1, char* ac2, char* ac3){
 if(atoi(input) == 4 && atoi(ans) == 1){
@@ -816,37 +852,8 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	break;
 }//end invalid response
 }
-		while(strcmp("Invalid Account Number - Please try again -", server_reply) == 0 ) { 
-	scanf("%s", message);
-	sprintf(buf, "SEXTERNAL %s", message);
-	write(sockfd, buf, strlen(buf) + 1 );
-	//Receive a reply from the server
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            //break;
-        }
-	//Display message back from server
-	puts(server_reply);
-	}
-	
-	//If client has no extra accounts, First option will be EXTERNAL
-	//If server replies asking for an amount to transfer to external account num
-	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", server_reply) == 0 ) {
-	//save amount to send to buf
-	extTranSav(buf, message);
-	//Send the userinput to server
-	write(sockfd, buf, strlen(buf) + 1);
-	//Receive a reply from the server
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            //break;
-        }
-	//Display message back from server
-	puts(server_reply);
-	}
-	//while the server is sending back an incorrect client num input
+	invalidAccount(server_reply, message, buf, sockfd);
+		
 }//End If Option item 1
 
 	//If the user selects option 2
@@ -886,37 +893,8 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 }
 
 }
-	while(strcmp("Invalid Account Number - Please try again -", server_reply) == 0 ) { 
-	scanf("%s", message);
-	sprintf(buf, "SEXTERNAL %s", message);
-	write(sockfd, buf, strlen(buf) + 1 );
-	//Receive a reply from the server
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            //break;
-        }
-	//Display message back from server
-	puts(server_reply);
-	}
+	invalidAccount(server_reply, message, buf, sockfd);
 	
-	//If client has no extra accounts, First option will be EXTERNAL
-	//If server replies asking for an amount to transfer to external account num
-	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", server_reply) == 0 ) {
-	//save amount to send to buf
-	extTranSav(buf, message);
-	//Send the userinput to server
-	write(sockfd, buf, strlen(buf) + 1);
-	//Receive a reply from the server
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            //break;
-        }
-	//Display message back from server
-	puts(server_reply);
-	}
-	//while the server is sending back an incorrect client num input
 
 }//End of menu selection 2
 
