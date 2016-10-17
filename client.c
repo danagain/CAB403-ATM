@@ -175,23 +175,6 @@ return input;
 
 
 
-char *Receive_Array_char_Data(int socket_identifier, int size) {
-    int number_of_bytes, i=0;
-    char names;
-
-	char *resultss = malloc(sizeof(char)*size);
-	for (i=0; i < size; i++) {
-		if ((number_of_bytes=recv(socket_identifier, &names, sizeof(char), 0))
-		         == -1) {
-			perror("recv");
-			exit(EXIT_FAILURE);
-		}
-		resultss[i] = names;
-	}
-	return resultss;
-}
-
-
 	#define MAXDATASIZE 100 /* max number of bytes we can get at once */
 
 	#define ARRAY_SIZE 30
@@ -462,16 +445,6 @@ int main(int argc, char *argv[]) {
 	}
 	clrscr();
 	interface(); // create user interface of an ATM , take username and
-//			pin number and send to server for authentication
-
-
-	//Send_Username(sockfd, username, client_pin);
-	//char* buff = Receive_Array_char_Data(sockfd, 1024);
-	//if(buff[0] == 'E' && buff[1] == 'R' && buff[2] == 'R'){
-	//printf("Incorrect Username and/or Password");
-	//close(sockfd);
-	//return 0;
-	//}
 
 char message[1000] , server_reply[2000], fromBuf[120], trans[1000];
 
@@ -533,28 +506,42 @@ closing = atoi(clientClose);
 
 login = true;
 clrscr();
+
+
+//Login is validated , Enter main communication loop with server
  while(1)
     {
-	if(selection == true){
-	//Reset Variables
+//If I end up back at this point , re set all my menu driven variables and enter the selection menu
+if(selection == true){
+//Reset Variables
 ans[0] = 'Z';
 ans2[0] = 'Z';
 message[0] = 'Z';
 buf[0] = 'Z';
 input[0] = 'Z';
-	selectionMenu();
+selectionMenu();
 }
 
 
-//balance while loop
+//////////////////////////////////////////////////////////////////
+//      ENTERING THE BALANCE MENU  WHILE LOOP                   //
+//								//
+//			STAGES	                                //
+// 1. LOOP WHILE INPUT IS INVALID FROM USER                     //
+// 2. IF OPTION 1, READ/WRITE                                   //
+// 3. IF OPTION 2 & 1 EXTRA ACCOUNTS EXIST, READ/WRITE          //
+// 4. IF OPTION 3 SELECTED, CLIENT MUST HAVE 2 EXTRA ACCOUNTS   //                   
+//    READ/WRITE                                                //
+//                                                              //
+//                                                              //
+//////////////////////////////////////////////////////////////////
+
+	//BALANCE WHILE LOOP
 	while(atoi(&input[0]) == 1) {
-					//If e is pressed go back a screen
-	if(exitMenu(ans,ans2,message,buf) == true){
-	break;
-}
-
-//while the selection input is not valid
+bool shouldExit = false;
+//Loop for the menu selection
 while(1){	
+	//Display the menu
 	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans[0]) == 1){
@@ -564,17 +551,24 @@ while(1){
 	if(atoi(&ans[0]) == 2 && (account2 == true || account3 == true)){
 	break;
 	}
+	//if option 3 is selected and there is one - continue
 	if(atoi(&ans[0]) == 3 && account2 == true && account3 == true){
 	break;
 	}	
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
-	selectionMenu();
-	selection = false;
+	//selectionMenu();
+	shouldExit = true;
+	selection = true;
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
 	}
+	}
+	
+	//If an exit was opted for in the balance menu - exit balance loop entirely
+	if(shouldExit == true){
+		break;
 	}
 
 	if(atoi(&ans[0]) == 1 && account1 == true){
@@ -660,11 +654,9 @@ break;
 
 //withdraw while loop
 while(atoi(&input[0]) == 2) {
-					//If e is pressed go back a screen
-	if(exitMenu(ans,ans2,message,buf) == true){
-	break;
-}
-//while the selection input is not valid
+bool shouldExit = false;
+//while loop - display the menu - if input invalid print invalid - if e to exit break the loop and switch a variable
+//so the external while loop exits as well then we go back to while(1) in main with menu selection and reset variables
 while(1){
 	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
@@ -677,21 +669,41 @@ while(1){
 	}
 			//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
-		selectionMenu();
+	shouldExit = true;	//selectionMenu();
+	selection = true;
 	break;
 }
-	
 	else{
 	printf("\nInvalid Option - Select Again");
 	}
-
 }
+	//Yes e/E was pressed in selection loop - break the "WITHDRAW" loop	
+	if(shouldExit == true){
+			break;
+		}
 
+
+	//IF ACCOUNT 1 IS SELECTED
 	if(atoi(&ans[0]) == 1){
+	bool exitSav = false;
 	char* withdrawal;
 	printf(" Savings Balance Selected - > Send savings Withdrawal variable to server \n");
 	printf("\n\nHow much would you like to WITHDRAW: ");
 	scanf("%s" ,message);
+	//MAKING SURE INPUT > 0
+	while(atoi(message) <=0){ 
+	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
+	scanf("%s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	exitSav = true;
+	break;
+	}
+	}
+	if(exitSav == true){
+		break;
+	}
 	sprintf(buf, "WITHDRAWSAV %s", message);
 	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
@@ -710,10 +722,30 @@ break;
 }
 	if(atoi(&ans[0]) == 2){
 	char* withdrawal;
+	bool exitCredit = false;
 	printf(" Credit Balance Selected - > Send savings Withdrawal variable to server \n");
 	printf("\n\nHow much would you like to WITHDRAW: ");
 	scanf("%s" ,message);
+	//MAKING SURE INPUT > 0
+	while(atoi(message) <=0){ 
+	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
+	scanf("%s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	exitCredit = true;
+	break;
+	}
+	}
+	if(exitCredit == true){
+		break;
+	}
 	sprintf(buf, "WITHDRAWCREDIT %s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
@@ -734,11 +766,8 @@ break;
 
 
 while(atoi(&input[0]) == 3) {
+bool shouldBreak = false;
 printf("\nThe Maximum Daily Limit is $1000.00\n");
-					//If e is pressed go back a screen
-	if(exitMenu(ans,ans2,message,buf) == true){
-	break;
-}
 //handle the selection input
 while(1){	
 	whatAccounts(clientAc1, clientAc2, clientAc3);
@@ -755,24 +784,46 @@ while(1){
 	}	
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
-	selectionMenu();
-	selection = false;
+	shouldBreak = true;
+	selection = true;
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
 	}
 	}
 
-
+	if(shouldBreak == true){
+	break;
+	}
 	if(atoi(&ans[0]) == 1){
 	char* deposit;
+	bool exitDepSav = false;
 	printf(" Savings Balance Selected - > Send savings Credit variable to server \n");
-	printf("\n\nHow much would you like to DEPOSIT: ");
+	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	//MAKING SURE INPUT > 0
+	while(atoi(message) <=0){ 
+	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
+	scanf("%s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	exitDepSav = true;
+	break;
+	}
+	}
+	if(exitDepSav == true){
+		break;
+	}
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITSAV %s", message);
+			//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
@@ -806,13 +857,33 @@ break;
 
 if(atoi(&ans[0]) == 2 && account2 == false && account3 == true){
 	char* deposit;
+	bool exitDepCred = false;
 	printf(" Loan Balance Selected - > Send Loan variable to server \n");
-	printf("\n\nHow much would you like to DEPOSIT: ");
+	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	//MAKING SURE INPUT > 0
+	while(atoi(message) <=0){ 
+	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
+	scanf("%s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	exitDepCred = true;
+	break;
+	}
+	}
+	if(exitDepCred == true){
+		break;
+	}
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITCREDIT %s", message);
+			//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
@@ -846,13 +917,33 @@ break;
 
 if(atoi(&ans[0]) == 2 && account2 == true){
 	char* deposit;
+	bool exitDepLoan = false;
 	printf(" Loan Balance Selected - > Send Loan variable to server \n");
-	printf("\n\nHow much would you like to DEPOSIT: ");
+	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	//MAKING SURE INPUT > 0
+	while(atoi(message) <=0){ 
+	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
+	scanf("%s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	exitDepLoan = true;
+	break;
+	}
+	}
+	if(exitDepLoan == true){
+		break;
+	}
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITLOAN %s", message);
+			//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	write(sockfd , buf , strlen(buf)+1);
 	        //Receive a reply from the server
         if( recv(sockfd , server_reply , 2000 , 0) < 0)
@@ -886,10 +977,25 @@ break;
 
 if(atoi(&ans[0]) == 3 && account3 == true){
 	char* deposit;
+	bool exitDepCred2 = false;
 	printf(" Credit Balance Selected - > Send  Credit variable to server \n");
-	printf("\n\nHow much would you like to DEPOSIT: ");
+	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	//MAKING SURE INPUT > 0
+	while(atoi(message) <=0){ 
+	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
+	scanf("%s", message);
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	exitDepCred2 = true;
+	break;
+	}
+	}
+	if(exitDepCred2 == true){
+		break;
+	}
 	//fgets(message,1000,stdin);
 	//sscanf(message, "%s" , withdrawal);
 	sprintf(buf, "DEPOSITCREDIT %s", message);
@@ -1335,8 +1441,6 @@ while(1){
 	printf("\nInvalid Option - Select Again");
 	}
 	}
-
-
 
 	if(atoi(&ans[0]) == 1){
 	char* deposit;
