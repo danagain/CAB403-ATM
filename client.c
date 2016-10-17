@@ -359,46 +359,27 @@ printf("\nPlease make your selection (E/e to exit) -");
 }
 
 
+
 //WITHDRAW OPTION - NO LOAN ACCOUNT
-if(atoi(input) == 2 || atoi(input) == 4){
-printf("\n\nSelect account type");
-//ACCOUNT 1
-if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
+if(atoi(&input[0]) == 2){
+if(atoi(ac3) == 0){
 printf("\n<1> Savings Account");
-account1 = true;
+}
+if(atoi(ac3) > 0){
+printf("\n<1> Savings Account");
+printf("\n<2> Credit Account");
+}
 }
 
-if(atoi(ac1) > 0 && atoi(ac1) % 13 == 0){
-printf("\n<1> Credit Card Account");
-account3 = true;
-}
-//ACCOUNT 2
-if(atoi(ac2) > 0 && atoi(ac2) % 11 == 0){
-printf("\n<2> Savings Account");
-account1 = true;
-}
 
-if(atoi(ac2) > 0 && atoi(ac2) % 13 == 0){
-printf("\n<2> Credit Card Account");
-account3 = true;
-}
-//ACCOUNT 3
-if(atoi(ac3) > 0 && atoi(ac3) % 11 == 0){
-printf("\n<2> Savings Account");
-account1 = true;
-}
 
-if(atoi(ac3) > 0 && atoi(ac3) % 13 == 0){
-printf("\n<2> Credit Card Account");
-account3 = true;
-}
 if(atoi(input) == 1 || atoi(input) == 2 || atoi(input) == 3){
 printf("\nEnter your selection (E/e to exit) - ");
 }
 if(atoi(input) == 4){
 printf("\nSelect Account To Transfer From (E/e to exit) -");
 }
-}
+
 
 
 scanf("%s",ans);
@@ -1103,12 +1084,9 @@ tmenuThree(clientAc2, clientAc3, message, buf);
 	//Display message back from server
 	puts(server_reply);
 	}
-
 }
 
 }//End If Menu Item 1 ( SAVINGS )
-
-//////////////////////////////////////////////////// TO DO - EVERYTHING FOR MENU OPTION 2 CREDIT /////////////////////////////////
 
 
 //If the credit option for transfer is selected and they have a credit account
@@ -1409,10 +1387,6 @@ break;
 
 
 }
-
-
-
-
 
 }
 
