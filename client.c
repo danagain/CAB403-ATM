@@ -570,6 +570,7 @@ while(1){
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	selectionMenu();
+	selection = false;
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
@@ -673,14 +674,16 @@ while(1){
 	//If credit is selected and the account exists - continue
 	if(atoi(&ans[0]) == 2 && account3 == true){
 	break;
-	}else{
-	printf("\nInvalid Option - Select Again");
 	}
-		//If e is pressed go back a screen
+			//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 		selectionMenu();
 	break;
 }
+	
+	else{
+	printf("\nInvalid Option - Select Again");
+	}
 
 }
 
@@ -732,6 +735,10 @@ break;
 
 while(atoi(&input[0]) == 3) {
 printf("\nThe Maximum Daily Limit is $1000.00\n");
+					//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
 //handle the selection input
 while(1){	
 	whatAccounts(clientAc1, clientAc2, clientAc3);
@@ -749,6 +756,7 @@ while(1){
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	selectionMenu();
+	selection = false;
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
@@ -924,17 +932,23 @@ while(1){
 	//If credit is selected and the account exists - continue
 	if(atoi(&ans[0]) == 2 && account3 == true){
 	break;
-	}else{
-	printf("\nInvalid Option - Select Again");
 	}
-		//If e is pressed go back a screen
+			//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 		//selectionMenu();
-	selection = false;
+	selection = true;
 	break;
 }
-}
 
+	else{
+	printf("\nInvalid Option - Select Again");
+	}
+}
+		if(exitMenu(ans,ans2,message,buf) == true){
+		//selectionMenu();
+	//selection = false;
+	break;
+}
 
 	//If the savings account is selected
 	if(atoi(&ans[0]) == 1 ){
@@ -959,6 +973,7 @@ while(1){
 	//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	//selectionMenu();
+	selection = true;
 	break;
 	}	
 	else{
@@ -1293,7 +1308,11 @@ break;
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 while(atoi(&input[0]) == 5) {
-//handle the selection input
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+
+//while the selection input is not valid
 while(1){	
 	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
@@ -1310,11 +1329,14 @@ while(1){
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	selectionMenu();
+	selection = false;
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
 	}
 	}
+
+
 
 	if(atoi(&ans[0]) == 1){
 	char* deposit;
@@ -1401,6 +1423,7 @@ break;
 //if EXIT is selected - exit gracefully , close the socket
 if(atoi(&input[0]) == 6){
 	printf("\n\n===========================\nThank you for using our ATM\n==========================");
+	write(sockfd, "CLIENTCLOSE", strlen("CLIENTCLOSE")+1);
     close(sockfd);
     return 0;
 }
