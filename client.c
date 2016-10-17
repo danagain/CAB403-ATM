@@ -325,47 +325,39 @@ char* whatAccounts(char* ac1, char* ac2, char* ac3){
 
 if(atoi(input) == 1 || atoi(input) == 3 || atoi(input) == 5){
 printf("\n\nSelect account type");
-//ACCOUNT 1
-if(atoi(ac1) > 0 && atoi(ac1) % 11 == 0){
+
+//If there is only a savings account
+if(atoi(ac2) == 0 && atoi(ac3) == 0){
 printf("\n<1> Savings Account");
 account1 = true;
 }
-if(atoi(ac1) > 0 && atoi(ac1) % 12 == 0){
-printf("\n<1> Loan Account");
-account2 = true;
-}
-if(atoi(ac1) > 0 && atoi(ac1) % 13 == 0){
-printf("\n<1> Credit Card Account");
-account3 = true;
-}
-//ACCOUNT 2
-if(atoi(ac2) > 0 && atoi(ac2) % 11 == 0){
-printf("\n<2> Savings Account");
-account1 = true;
-}
-if(atoi(ac2) > 0 && atoi(ac2) % 12 == 0){
+
+//if there is a saving account and only a loan
+if(atoi(ac2) > 0 && atoi(ac3) ==0 ){
+printf("\n<1> Savings Account");
 printf("\n<2> Loan Account");
-account2 = true;
-}
-if(atoi(ac2) > 0 && atoi(ac2) % 13 == 0){
-printf("\n<2> Credit Card Account");
-account3 = true;
-}
-//ACCOUNT 3
-if(atoi(ac3) > 0 && atoi(ac3) % 11 == 0){
-printf("\n<3> Savings Account");
 account1 = true;
-}
-if(atoi(ac3) > 0 && atoi(ac3) % 12 == 0){
-printf("\n<3> Loan Account");
 account2 = true;
 }
-if(atoi(ac3) > 0 && atoi(ac3) % 13 == 0){
-printf("\n<3> Credit Card Account");
+//if there is a saving account and only a credit
+if(atoi(ac3) > 0 && atoi(ac2) ==0 ){
+printf("\n<1> Savings Account");
+printf("\n<2> Credit Account");
+account1 = true;
 account3 = true;
 }
-printf("\nEnter your selection (E/e to exit) - ");
+//if there is a savings and + 2 extra acc
+if(atoi(ac3) > 0 && atoi(ac2) > 0 ) {
+printf("\n<1> Savings Account");
+printf("\n<2> Loan Account");
+printf("\n<3> Credit Account");
+account1 = true;
+account2 = true;
+account3 = true;
+} 
+printf("\nPlease make your selection (E/e to exit) -");
 }
+
 
 //WITHDRAW OPTION - NO LOAN ACCOUNT
 if(atoi(input) == 2 || atoi(input) == 4){
@@ -575,6 +567,31 @@ buf[0] = 'Z';
 //balance while loop
 	while(atoi(&input[0]) == 1) {
 	whatAccounts(clientAc1, clientAc2, clientAc3);
+
+//while the selection input is not valid
+while(1){	
+	//If savings is selected - continue
+	if(atoi(&ans[0]) == 1){
+	break;
+	}
+	//If credit is selected and the account exists - continue
+	if(atoi(&ans[0]) == 2 && (account2 == true || account3 == true)){
+	break;
+	}
+	if(atoi(&ans[0]) == 3 && account2 == true && account3 == true){
+	break;
+	}	
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}	else{
+	printf("\nInvalid Option - Select Again");
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+	}
+	}
+
+
+
 	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
 	selection = true;
 	break;
@@ -664,6 +681,25 @@ break;
 //withdraw while loop
 while(atoi(&input[0]) == 2) {
 whatAccounts(clientAc1, clientAc2, clientAc3);
+//while the selection input is not valid
+while(1){
+	//If savings is selected - continue
+	if(atoi(&ans[0]) == 1){
+	break;
+	}
+	//If credit is selected and the account exists - continue
+	if(atoi(&ans[0]) == 2 && account3 == true){
+	break;
+	}else{
+	printf("\nInvalid Option - Select Again");
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+	}
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+
+}
 	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
 	selection = true;
 	break;
@@ -719,6 +755,27 @@ break;
 while(atoi(&input[0]) == 3) {
 printf("\nThe Maximum Daily Limit is $1000.00\n");
 whatAccounts(clientAc1, clientAc2, clientAc3);
+//while the selection input is not valid
+while(1){	
+	//If savings is selected - continue
+	if(atoi(&ans[0]) == 1){
+	break;
+	}
+	//If credit is selected and the account exists - continue
+	if(atoi(&ans[0]) == 2 && (account2 == true || account3 == true)){
+	break;
+	}
+	if(atoi(&ans[0]) == 3 && account2 == true && account3 == true){
+	break;
+	}	
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}	else{
+	printf("\nInvalid Option - Select Again");
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+	}
+	}
 
 	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
 	selection = true;
@@ -889,7 +946,7 @@ while(1){
 	if(atoi(&ans[0]) == 2 && account3 == true){
 	break;
 	}else{
-	printf("Invalid Option - Select Again");
+	printf("\nInvalid Option - Select Again");
 	whatAccounts(clientAc1, clientAc2, clientAc3);
 	}
 		//If e is pressed go back a screen
@@ -1252,6 +1309,27 @@ break;
 ////////////////////////////////////////////////////////
 while(atoi(&input[0]) == 5) {
 whatAccounts(clientAc1, clientAc2, clientAc3);
+//while the selection input is not valid
+while(1){	
+	//If savings is selected - continue
+	if(atoi(&ans[0]) == 1){
+	break;
+	}
+	//If credit is selected and the account exists - continue
+	if(atoi(&ans[0]) == 2 && (account2 == true || account3 == true)){
+	break;
+	}
+	if(atoi(&ans[0]) == 3 && account2 == true && account3 == true){
+	break;
+	}	
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}	else{
+	printf("\nInvalid Option - Select Again");
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+	}
+	}
 
 	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
 	selection = true;
@@ -1320,7 +1398,7 @@ break;
 
 }
 
-if(atoi(&ans[0]) == 3 && account3 == true){
+if(atoi(&ans[0]) == 3 && account3 == true && account2 == true){
 	char* deposit;
 	printf(" Savings Transactions Selected - > Send savings trans variable to server \n");
 	sprintf(buf, "TRANSACTIONS %s", clientAc3);
@@ -1347,33 +1425,6 @@ break;
 
 
 }
-
-       // Send some data
-      //  if( send(sockfd , message , strlen(message)+1 , 0) < 0)
-        //{
-          //  puts("Send failed");
-            //return 1;
-        //}
-
-
-
-
-        //Receive a reply from the server
-       // if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        //{
-         //   puts("recv failed");
-           // break;
-        //}
-
-
-
-       // puts("Server reply :");
-       // puts(server_reply);
-
-	//if(atoi(&ans[0]) == 1){
-	//selectionMenu();
-//}
-
 
 	if(login == true){
 	clrscr();
