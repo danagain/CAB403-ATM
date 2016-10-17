@@ -52,6 +52,14 @@ return false;
 		sprintf(buf, "AMOUNTD %s", msg);
 		return buf;
 	}
+		char* extTranCred(char* buf, char* msg){
+		//ask the user how much they wish to send to the account
+		//printf("Enter the Amount to Transfer (E/e to exit) - $");
+		//intake the amount , store in buf
+		scanf("%s", msg);
+		sprintf(buf, "AMOUNTC %s", msg);
+		return buf;
+	}
 
 char* tmenuOne( char* ac2, char* ac3, char* answer, char* answer2, char* msg, char* buf, int sock){
 	//If there is a loan accounnt
@@ -73,9 +81,41 @@ if(atoi(ac2) == 0 && atoi(ac3) % 13 == 0 && atoi(ac3) > 0 ){
 if(atoi(ac2) == 0 && atoi(ac3) == 0){
 	printf("Enter Destination Account Number (E/e  to exit) - ");
 	scanf("%s", msg);
-	sprintf(buf, "SEXTERNAL %s", msg);
+	sprintf(buf, "EXTERNAL %s", msg);
 	//write(sock, buf, strlen(buf)+1);
 }
+
+return buf;
+}
+
+char* tmenuOneC( char* ac2, char* ac1, char* answer, char* answer2, char* msg, char* buf, int sock){
+	//If they have a credit, there is a savings DISP as first option
+	if(atoi(ac1) % 11 == 0 && atoi(ac1) > 0){
+	//send server credit->internal->savings
+	printf("Enter the Amount to Transfer (E/e  to exit) - ");
+	scanf("%s", msg);
+	sprintf(buf, "CINTERNALS %s", msg);
+	//write(sock, buf, strlen(buf)+1);
+	}
+
+return buf;
+}
+
+char* tmenuTwoC( char* ac2, char* ac1, char* answer, char* answer2, char* msg, char* buf, int sock){
+	//If there is a loan account it will be second after savings
+	if(atoi(ac2) % 12 == 0 && atoi(ac2) > 0) {
+	printf("Enter the Amount to Transfer (E/e to exit) - ");
+	scanf("%s", msg);
+	//send server credit->internal->loan
+	sprintf(buf, "CINTERNALL %s", msg);
+	}
+	//If there is no loan account then option 2 will be external after savings
+	if(atoi(ac2) == 0) {
+	printf("Enter Destination Account Number (E/e  to exit) - ");
+	scanf("%s", msg);
+	//send server credit->external
+	sprintf(buf, "EXTERNAL %s", msg);
+	}
 
 return buf;
 }
@@ -93,7 +133,7 @@ char* tmenuTwo( char* ac2, char* ac3, char* answer, char* answer2, char* msg, ch
 if(atoi(ac2) == 0 && atoi(ac3) % 13 == 0 && atoi(ac3) > 0 ){
 	printf("Enter Destination Account Number (E/e  to exit) - ");
 	scanf("%s", msg);
-	sprintf(buf, "SEXTERNAL %s", msg);
+	sprintf(buf, "EXTERNAL %s", msg);
 	//write(sock, buf, strlen(buf)+1);
 }
 return buf;
@@ -104,7 +144,7 @@ char* tmenuThree(char* ac2, char* ac3, char* msg, char* buf){
 	if(atoi(ac2) > 0 && atoi(ac3) > 0) {
 		printf("Enter Destination Account Number (E/e  to exit) - ");
 	scanf("%s", msg);
-	sprintf(buf, "SEXTERNAL %s", msg);
+	sprintf(buf, "EXTERNAL %s", msg);
 	//write(sock, buf, strlen(buf)+1);
 }
 return buf;
@@ -169,9 +209,9 @@ void interface(){
 
 
 void invalidAccount(char* reply, char* msg, char* buf, int sock){
-		while(strcmp("Invalid Account Number - Please try again -", reply) == 0 ) { 
+		while(strcmp("Invalid Account Number - Please try again (E/e to exit) -", reply) == 0 ) { 
 	scanf("%s", msg);
-	sprintf(buf, "SEXTERNAL %s", msg);
+	sprintf(buf, "EXTERNAL %s", msg);
 	write(sock, buf, strlen(buf) + 1 );
 	//Receive a reply from the server
         if( recv(sock , reply , 2000 , 0) < 0)
@@ -200,10 +240,40 @@ void invalidAccount(char* reply, char* msg, char* buf, int sock){
 	puts(reply);
 	}
 	//while the server is sending back an incorrect client num input
+}
 
-
-
-
+void invalidAccountCred(char* reply, char* msg, char* buf, int sock){
+		while(strcmp("Invalid Account Number - Please try again (E/e to exit) -", reply) == 0 ) { 
+	scanf("%s", msg);
+	sprintf(buf, "EXTERNAL %s", msg);
+	write(sock, buf, strlen(buf) + 1 );
+	//Receive a reply from the server
+        if( recv(sock , reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(reply);
+	}
+	
+	//If client has no extra accounts, First option will be EXTERNAL
+	//If server replies asking for an amount to transfer to external account num
+	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", reply) == 0 ) {
+	//save amount to send to buf
+	extTranCred(buf, msg);
+	//Send the userinput to server
+	write(sock, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+        if( recv(sock , reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(reply);
+	}
+	//while the server is sending back an incorrect client num input
 }
 
 char* transTo(char* ac1, char* ac2, char* ac3){
@@ -493,6 +563,11 @@ clrscr();
  while(1)
     {
 	if(selection == true){
+	//Reset Variables
+ans[0] = 'Z';
+ans2[0] = 'Z';
+message[0] = 'Z';
+buf[0] = 'Z';
 	selectionMenu();
 }
 
@@ -804,6 +879,25 @@ break;
 //WHILE WE ARE IN TRANSFER MENU
 while(atoi(&input[0]) == 4) {
 whatAccounts(clientAc1, clientAc2, clientAc3);
+//while the selection input is not valid
+while(1){
+	//If savings is selected - continue
+	if(atoi(&ans[0]) == 1){
+	break;
+	}
+	//If credit is selected and the account exists - continue
+	if(atoi(&ans[0]) == 2 && account3 == true){
+	break;
+	}else{
+	printf("Invalid Option - Select Again");
+	whatAccounts(clientAc1, clientAc2, clientAc3);
+	}
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+
+}
 	//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	break;
@@ -812,6 +906,30 @@ whatAccounts(clientAc1, clientAc2, clientAc3);
 	if(atoi(&ans[0]) == 1 ){
 	//Bring up the menu allowing user to select a transfer option
 	transTo(clientAc1, clientAc2, clientAc3);
+	
+	//If the selection is INVALID Ask again
+	while(1){
+	//If savings is selected - continue
+	if(atoi(&ans2[0]) == 1){
+	break;
+	}
+	//If option2 is selected and client has at least 1 extra account - continue
+	if(atoi(&ans2[0]) == 2 && (atoi(clientAc3) > 0 ||atoi(clientAc2) > 0)){
+	break;
+	}
+	//If option3 is selected and client has at least 2 extra account - continue
+	if(atoi(&ans2[0]) == 3 && atoi(clientAc2) > 0 && atoi(clientAc3) > 0){
+	break;
+	}else{
+	printf("\nInvalid Option - Select Again");
+	//Bring up the menu allowing user to select a transfer option
+	transTo(clientAc1, clientAc2, clientAc3);
+	}
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+}
 	//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	break;
@@ -916,21 +1034,8 @@ tmenuThree(clientAc2, clientAc3, message, buf);
 	if(exitMenu(ans,ans2,message,buf) == true){
 	break;
 }
-	while(strcmp("Invalid Account Number - Please try again -", server_reply) == 0 ) { 
-	scanf("%s", message);
-	sprintf(buf, "SEXTERNAL %s", message);
-	write(sockfd, buf, strlen(buf) + 1 );
-	//Receive a reply from the server
-        if( recv(sockfd , server_reply , 2000 , 0) < 0)
-        {
-            puts("recv failed");
-            //break;
-        }
-	//Display message back from server
-	puts(server_reply);
-	}
-	
-	//If client has no extra accounts, First option will be EXTERNAL
+	//if account number is invalid
+	invalidAccount(server_reply, message, buf, sockfd);
 	//If server replies asking for an amount to transfer to external account num
 	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", server_reply) == 0 ) {
 	//save amount to send to buf
@@ -946,12 +1051,186 @@ tmenuThree(clientAc2, clientAc3, message, buf);
 	//Display message back from server
 	puts(server_reply);
 	}
-	//while the server is sending back an incorrect client num input
+
 }
 
 }//End If Menu Item 1 ( SAVINGS )
 
 //////////////////////////////////////////////////// TO DO - EVERYTHING FOR MENU OPTION 2 CREDIT /////////////////////////////////
+
+
+//If the credit option for transfer is selected and they have a credit account
+if(atoi(&ans[0]) == 2 && account3 == true)
+{
+	//Bring up the menu allowing user to select a transfer option
+	transTo(clientAc1, clientAc2, clientAc3);
+	//If the selection is INVALID Ask again
+	while(1){
+	//If savings is selected - continue
+	if(atoi(&ans2[0]) == 1){
+	break;
+	}
+	//If option2 is selected and client has at least 1 extra account - continue
+	if(atoi(&ans2[0]) == 2 && (atoi(clientAc3) > 0 ||atoi(clientAc2) > 0)){
+	break;
+	}
+	//If option3 is selected and client has at least 2 extra account - continue
+	if(atoi(&ans2[0]) == 3 && atoi(clientAc2) > 0 && atoi(clientAc3) > 0){
+	break;
+	}else{
+	printf("\nInvalid Option - Select Again");
+	//Bring up the menu allowing user to select a transfer option
+	transTo(clientAc1, clientAc2, clientAc3);
+	}
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+}
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+	//If the first account option is selected
+	if(atoi(&ans2[0]) == 1)
+	{
+			//If e is pressed go back a screen
+		if(exitMenu(ans,ans2,message,buf) == true){
+			break;
+		}
+		//Execute method for first option
+		tmenuOneC( clientAc2, clientAc1, ans, ans2, message, buf, sockfd);
+		//send appropriate action to server
+		write(sockfd, buf, strlen(buf)+1);
+		//Receive a reply from the server
+	        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+		//Display message back from server
+		puts(server_reply);	
+	}
+	//If the server comes back with insifficent funds
+	//While the response is invalid	
+	while(strcmp("Insufficient Funds - Unable To Process Request", server_reply) == 0){
+	tmenuOneC( clientAc2, clientAc1, ans, ans2, message, buf, sockfd);
+	//Send the userinput to server
+	write(sockfd, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+	  if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }
+	//Display message back from server
+	puts(server_reply);
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+
+}// end option 1
+
+	//If option 2 inside CREDIT transfer is selected 
+	if(atoi(&ans2[0]) == 2 && atoi(&ans[0]) == 2){
+	//while in option 2 if e is pressed go back to menu
+		if(exitMenu(ans,ans2,message,buf) == true){
+			break;
+		}
+	//Execute method for Option 2 - Transfer from Credit
+	tmenuTwoC(clientAc2, clientAc1, ans, ans2, message, buf, sockfd);
+	//write outcome to server
+	write(sockfd, buf, strlen(buf)+1);
+	//Receive back from server
+	if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }
+	//Display message back from server
+	puts(server_reply);
+
+	//If the server comes back with insifficent funds
+	//While the response is invalid	
+	while(strcmp("Insufficient Funds - Unable To Process Request", server_reply) == 0){
+	tmenuTwoC( clientAc2, clientAc1, ans, ans2, message, buf, sockfd);
+	//Send the userinput to server
+	write(sockfd, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+	  if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            break;
+        }
+	//Display message back from server
+	puts(server_reply);
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+}
+	//If there is no loan account the option 2 method will have sent the server
+	//A external transfer request
+		//if account number is invalid
+	invalidAccountCred(server_reply, message, buf, sockfd);
+	//If server replies asking for an amount to transfer to external account num
+	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", server_reply) == 0 ) {
+	//save amount to send to buf
+	extTranCred(buf, message);
+	//Send the userinput to server
+	write(sockfd, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(server_reply);
+	}
+}//END option 2
+
+	//IF there is an option 3 then the client has +2 accounts
+	if(atoi(&ans2[0]) == 3 && atoi(clientAc2) > 0 && atoi(clientAc3) > 0){
+	printf("Enter Destination Account Number (E/e  to exit) - ");
+	scanf("%s", message);
+	sprintf(buf, "EXTERNAL %s", message);
+	//Send the userinput to server
+	write(sockfd, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+	        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(server_reply);
+		//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
+	//if account number is invalid
+	invalidAccountCred(server_reply, message, buf, sockfd);
+	//If server replies asking for an amount to transfer to external account num
+	if(strcmp("Enter the Amount to Transfer (E/e to exit) - $", server_reply) == 0 ) {
+	//save amount to send to buf
+	extTranCred(buf, message);
+	//Send the userinput to server
+	write(sockfd, buf, strlen(buf) + 1);
+	//Receive a reply from the server
+        if( recv(sockfd , server_reply , 2000 , 0) < 0)
+        {
+            puts("recv failed");
+            //break;
+        }
+	//Display message back from server
+	puts(server_reply);
+	}
+
+	}//END option 3
+
+}//END Credit transfer
 
 //Transfer Over , Take me to main menu
 selection = true;
