@@ -690,8 +690,12 @@ while(1){
 	printf(" Savings Balance Selected - > Send savings Withdrawal variable to server \n");
 	printf("\n\nHow much would you like to WITHDRAW: ");
 	scanf("%s" ,message);
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	//MAKING SURE INPUT > 0
-	while(atoi(message) <=0){ 
+	while(atoi(message) <=0 ){ 
 	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
 	scanf("%s", message);
 	//If e is pressed go back a screen
@@ -726,6 +730,10 @@ break;
 	printf(" Credit Balance Selected - > Send savings Withdrawal variable to server \n");
 	printf("\n\nHow much would you like to WITHDRAW: ");
 	scanf("%s" ,message);
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	//MAKING SURE INPUT > 0
 	while(atoi(message) <=0){ 
 	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
@@ -802,6 +810,10 @@ while(1){
 	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	//MAKING SURE INPUT > 0
 	while(atoi(message) <=0){ 
 	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
@@ -862,6 +874,10 @@ if(atoi(&ans[0]) == 2 && account2 == false && account3 == true){
 	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	//MAKING SURE INPUT > 0
 	while(atoi(message) <=0){ 
 	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
@@ -922,6 +938,10 @@ if(atoi(&ans[0]) == 2 && account2 == true){
 	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	//MAKING SURE INPUT > 0
 	while(atoi(message) <=0){ 
 	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
@@ -982,6 +1002,10 @@ if(atoi(&ans[0]) == 3 && account3 == true){
 	printf("\nEnter the amount to deposit (E/e) to exit : $");
 	//fgets(message,1000,stdin);
 	scanf("%s" ,message);
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+	}
 	//MAKING SURE INPUT > 0
 	while(atoi(message) <=0){ 
 	printf("\n\nPlease input a value greater than 0 - (E/e to exit) - $");
