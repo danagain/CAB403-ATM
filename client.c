@@ -560,16 +560,21 @@ ans[0] = 'Z';
 ans2[0] = 'Z';
 message[0] = 'Z';
 buf[0] = 'Z';
+input[0] = 'Z';
 	selectionMenu();
 }
 
 
 //balance while loop
 	while(atoi(&input[0]) == 1) {
-	whatAccounts(clientAc1, clientAc2, clientAc3);
+					//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
 
 //while the selection input is not valid
 while(1){	
+	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans[0]) == 1){
 	break;
@@ -583,20 +588,13 @@ while(1){
 	}	
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
+	selectionMenu();
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
-	whatAccounts(clientAc1, clientAc2, clientAc3);
 	}
 	}
 
-
-
-	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
-	selection = true;
-	break;
-
-}
 	if(atoi(&ans[0]) == 1 && account1 == true){
 
 printf(" Savings Balance Selected - > Send savings Balance variable to server \n");
@@ -680,9 +678,13 @@ break;
 
 //withdraw while loop
 while(atoi(&input[0]) == 2) {
-whatAccounts(clientAc1, clientAc2, clientAc3);
+					//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	break;
+}
 //while the selection input is not valid
 while(1){
+	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans[0]) == 1){
 	break;
@@ -692,17 +694,12 @@ while(1){
 	break;
 	}else{
 	printf("\nInvalid Option - Select Again");
-	whatAccounts(clientAc1, clientAc2, clientAc3);
 	}
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
+		selectionMenu();
 	break;
 }
-
-}
-	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
-	selection = true;
-	break;
 
 }
 
@@ -754,9 +751,9 @@ break;
 
 while(atoi(&input[0]) == 3) {
 printf("\nThe Maximum Daily Limit is $1000.00\n");
-whatAccounts(clientAc1, clientAc2, clientAc3);
-//while the selection input is not valid
+//handle the selection input
 while(1){	
+	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans[0]) == 1){
 	break;
@@ -770,18 +767,14 @@ while(1){
 	}	
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
+	selectionMenu();
 	break;
 }	else{
 	printf("\nInvalid Option - Select Again");
-	whatAccounts(clientAc1, clientAc2, clientAc3);
 	}
 	}
 
-	if(strcmp(ans,"e") == 0 || strcmp(ans,"E") == 0){
-	selection = true;
-	break;
 
-}
 	if(atoi(&ans[0]) == 1){
 	char* deposit;
 	printf(" Savings Balance Selected - > Send savings Credit variable to server \n");
@@ -935,9 +928,14 @@ break;
 ///////////////////////////////
 //WHILE WE ARE IN TRANSFER MENU
 while(atoi(&input[0]) == 4) {
-whatAccounts(clientAc1, clientAc2, clientAc3);
+					//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	selection = true;
+	break;
+}
 //while the selection input is not valid
 while(1){
+	whatAccounts(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans[0]) == 1){
 	break;
@@ -947,18 +945,15 @@ while(1){
 	break;
 	}else{
 	printf("\nInvalid Option - Select Again");
-	whatAccounts(clientAc1, clientAc2, clientAc3);
 	}
 		//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
+		//selectionMenu();
+	selection = false;
 	break;
+}
 }
 
-}
-	//If e is pressed go back a screen
-	if(exitMenu(ans,ans2,message,buf) == true){
-	break;
-}
 	//If the savings account is selected
 	if(atoi(&ans[0]) == 1 ){
 	//Bring up the menu allowing user to select a transfer option
