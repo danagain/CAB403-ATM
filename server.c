@@ -512,7 +512,7 @@ if(strcmp(firstWord, "DEPOSITLOAN") == 0) {
 	float calc = clientsinfo[saveTracker].figs2.close += curr;
 	sprintf(onlineClose2, "%.2lf", clientsinfo[saveTracker].figs2.close);
 	sprintf(buf, "\n\nDeposit Completed: Closing Balance : %s" , onlineClose2);
-	append_transaction(0, atoi(onlineAc2), curr, "Deposit");
+	append_transaction(atoi(onlineAc2), 0, curr, "Deposit");
 	 write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 	write(sock, "You cannot deposit more than $1000.00 in a single transaction!", strlen("You cannot deposit more than $1000.00 in a single transaction!")+1);
@@ -525,7 +525,7 @@ if(strcmp(firstWord, "DEPOSITCREDIT") == 0) {
 	float calc = clientsinfo[saveTracker].figs3.close += curr;
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\nDeposit Completed: Closing Balance : %s" , onlineClose3);
-	append_transaction(0, atoi(onlineAc3), curr, "Deposit");
+	append_transaction(atoi(onlineAc3), 0, curr, "Deposit");
 	 write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 	write(sock, "You cannot deposit more than $1000.00 in a single transaction!", strlen("You cannot deposit more than $1000.00 in a single transaction!")+1);

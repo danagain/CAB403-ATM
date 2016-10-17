@@ -1395,12 +1395,17 @@ if(atoi(&ans[0]) == 3 && account3 == true && account2 == true){
 printf("\n\n\n===================================================================\n");
 	selection = true;
 break;
-
-
-
+}
 }
 
+//if EXIT is selected - exit gracefully , close the socket
+if(atoi(&input[0]) == 6){
+	printf("\n\n===========================\nThank you for using our ATM\n==========================");
+    close(sockfd);
+    return 0;
 }
+
+
 
 	if(login == true){
 	clrscr();
