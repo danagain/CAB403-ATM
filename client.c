@@ -355,25 +355,25 @@ account1 = true;
 account2 = true;
 account3 = true;
 } 
-printf("\nPlease make your selection (E/e to exit) -");
 }
 
 
 
 //WITHDRAW OPTION - NO LOAN ACCOUNT
-if(atoi(&input[0]) == 2){
+if(atoi(&input[0]) == 2 || atoi(&input[0]) == 4){
 if(atoi(ac3) == 0){
 printf("\n<1> Savings Account");
 }
 if(atoi(ac3) > 0){
 printf("\n<1> Savings Account");
 printf("\n<2> Credit Account");
+account3 = true;
 }
 }
 
 
 
-if(atoi(input) == 1 || atoi(input) == 2 || atoi(input) == 3){
+if(atoi(input) == 1 || atoi(input) == 2 || atoi(input) == 3 || atoi(input) == 5){
 printf("\nEnter your selection (E/e to exit) - ");
 }
 if(atoi(input) == 4){
@@ -935,13 +935,15 @@ while(1){
 }
 }
 
+
 	//If the savings account is selected
 	if(atoi(&ans[0]) == 1 ){
-	//Bring up the menu allowing user to select a transfer option
-	transTo(clientAc1, clientAc2, clientAc3);
+	
 	
 	//If the selection is INVALID Ask again
 	while(1){
+	//Bring up the menu allowing user to select a transfer option
+	transTo(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans2[0]) == 1){
 	break;
@@ -953,15 +955,17 @@ while(1){
 	//If option3 is selected and client has at least 2 extra account - continue
 	if(atoi(&ans2[0]) == 3 && atoi(clientAc2) > 0 && atoi(clientAc3) > 0){
 	break;
-	}else{
+	}
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	//selectionMenu();
+	break;
+	}	
+	else{
 	printf("\nInvalid Option - Select Again");
 	//Bring up the menu allowing user to select a transfer option
 	transTo(clientAc1, clientAc2, clientAc3);
 	}
-	//If e is pressed go back a screen
-	if(exitMenu(ans,ans2,message,buf) == true){
-	break;
-}
 }
 	//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
@@ -1092,10 +1096,11 @@ tmenuThree(clientAc2, clientAc3, message, buf);
 //If the credit option for transfer is selected and they have a credit account
 if(atoi(&ans[0]) == 2 && account3 == true)
 {
-	//Bring up the menu allowing user to select a transfer option
-	transTo(clientAc1, clientAc2, clientAc3);
+	
 	//If the selection is INVALID Ask again
 	while(1){
+	//Bring up the menu allowing user to select a transfer option
+	transTo(clientAc1, clientAc2, clientAc3);
 	//If savings is selected - continue
 	if(atoi(&ans2[0]) == 1){
 	break;
@@ -1107,15 +1112,22 @@ if(atoi(&ans[0]) == 2 && account3 == true)
 	//If option3 is selected and client has at least 2 extra account - continue
 	if(atoi(&ans2[0]) == 3 && atoi(clientAc2) > 0 && atoi(clientAc3) > 0){
 	break;
-	}else{
+	}
+	//If e is pressed go back a screen
+	if(exitMenu(ans,ans2,message,buf) == true){
+	//selectionMenu();
+	break;
+	}	
+	else{
 	printf("\nInvalid Option - Select Again");
 	//Bring up the menu allowing user to select a transfer option
 	transTo(clientAc1, clientAc2, clientAc3);
 	}
+}
 	//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
 	break;
-}
+
 }
 	//If e is pressed go back a screen
 	if(exitMenu(ans,ans2,message,buf) == true){
@@ -1164,12 +1176,12 @@ if(atoi(&ans[0]) == 2 && account3 == true)
 
 	//If option 2 inside CREDIT transfer is selected 
 	if(atoi(&ans2[0]) == 2 && atoi(&ans[0]) == 2){
-	//while in option 2 if e is pressed go back to menu
+	//Execute method for Option 2 - Transfer from Credit
+	tmenuTwoC(clientAc2, clientAc1, ans, ans2, message, buf, sockfd);
+		//while in option 2 if e is pressed go back to menu
 		if(exitMenu(ans,ans2,message,buf) == true){
 			break;
 		}
-	//Execute method for Option 2 - Transfer from Credit
-	tmenuTwoC(clientAc2, clientAc1, ans, ans2, message, buf, sockfd);
 	//write outcome to server
 	write(sockfd, buf, strlen(buf)+1);
 	//Receive back from server
