@@ -21,6 +21,10 @@
 FILE * clientDetails;
 FILE * toAuthenticate;
 FILE * accountsFile;
+FILE * trans;
+pthread_mutex_t lock;
+pthread_mutex_t lock2;
+
 
   //TRANSACTIONS STRUCT
  typedef struct Transactions{
@@ -28,12 +32,13 @@ FILE * accountsFile;
 	int toAccount;
 	float amount;
 	char transType[15];
+	int tType;
   }Transactions;
 Transactions* transactions = NULL;
 	int tranSize = 0;
 
-void append_transaction(int toAcc, int fromAcc, float amount, char* transtype)
-	{
+void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, int ttype)
+	{	pthread_mutex_lock(&lock);
 		int pos = tranSize;
 		transactions = realloc(transactions, (tranSize + 1) * sizeof(Transactions));
 		tranSize++;
@@ -41,6 +46,8 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype)
 		transactions[pos].toAccount = toAcc;
 		transactions[pos].amount = amount;
 		strcpy(transactions[pos].transType , transtype);
+		transactions[pos].tType = ttype;
+		 pthread_mutex_unlock(&lock);
 	}
   //AUTH STRUCT
   struct Clients {
@@ -87,6 +94,28 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype)
 
 	#define RETURNED_ERROR -1
 
+
+
+void writeTrans(){
+pthread_mutex_lock(&lock2);
+trans = fopen("Transactions.txt", "wb");
+fprintf(trans, "FromAccount      ToAccount       TranType    Amount\n");
+for(int i = 0; i < tranSize; i++ ) {
+fprintf(trans, "%d      %d       %s    %.2lf\n",transactions[i].fromAccount, transactions[i].toAccount, transactions[i].transType, transactions[i].amount);
+}
+fclose(trans);
+pthread_mutex_unlock(&lock2);
+}
+
+
+
+
+
+
+
+
+
+
 void fillClients(){
 char usernameSaved[15];
 int pin;
@@ -116,6 +145,7 @@ char x;
     }
     printf("clients user %s , clients pin %i\n", clients[cnt].username, clients[cnt].pinNumber);
   }
+fclose(toAuthenticate);
 }
 
 void fillClientsInfo(){
@@ -193,6 +223,7 @@ do{
 		printf("\n\n%s %s %d %d %d %d\n\n", detailsname, detailssurname, detailsclientnum, detailsaccount1, detailsaccount2, detailsaccount3);
     cnt2++;
   }
+	fclose(clientDetails);
 }
 
 void fillAccounts(){
@@ -221,6 +252,7 @@ for(int i = 0; i < 24; i++){
 printf("\n acc = %i open = %f close = %f \n" , accounts[i].accNum, accounts[i].openBal, accounts[i].closeBal);
 
 }
+	fclose(accountsFile);
 }
 
 char * Receive_Array_char_Data(int socket_identifier, int size) {
@@ -251,25 +283,14 @@ void sendStrings(int socket_id, char * theArray, int length) {
     send(socket_id, & characters, sizeof(char), 0);
   }
 }
-void Send_Array_Data(int socket_id, char* array) {
-
-	int i=0;
-	/* Create an array of squares of first 30 whole numbers */
-	int simpleArray[ARRAY_SIZE] = {0};
-	for (i = 0; i < ARRAY_SIZE; i++) {
-		simpleArray[i] = i * i;
-	}
-
-	uint16_t statistics;
-	for (i = 0; i < ARRAY_SIZE; i++) {
-		statistics = htons(simpleArray[i]);
-		send(socket_id, &statistics, sizeof(uint16_t), 0);
-	}
-}
 
 
 void *client_handler(void *socket_desc)
 {
+
+
+
+
 bool login = false;
 bool correctAc = false;
 char saveAcNum[20];
@@ -422,7 +443,13 @@ tracker++;
 	sscanf(client_message, "%s %[^\r]\n",firstWord,secondWord);
 	printf("Client input %s, First word %s, Second word %s\n", client_message, firstWord, secondWord);
 
+	if(strcmp(firstWord, "CLIENTCLOSE") == 0) {
+		writeTrans();
+	}
+	
 
+
+	
 	if(strcmp(firstWord, "BALANCE") == 0 && strcmp(secondWord, "SAVINGS") == 0) {
 	// loop to update client balance from struct
 	//for(int i = 0 ; i < 10; i++){
@@ -467,7 +494,7 @@ tracker++;
 	if(calc >= 0){
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc1 , onlineClose);
-	append_transaction(0, atoi(onlineAc1), curr, "Withdrawal");
+	append_transaction(atoi(onlineAc1), atoi(onlineAc1), curr, "Withdrawal", 2);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 		calc = clientsinfo[saveTracker].figs.close += curr;
@@ -482,7 +509,7 @@ tracker++;
 	if(calc >= clientsinfo[saveTracker].figs3.open - 5000){
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%s", onlineName, onlineSurname, onlineAc3 , onlineClose3);
-	append_transaction(0, atoi(onlineAc3), curr, "Withdrawal");
+	append_transaction(atoi(onlineAc3), atoi(onlineAc3), curr, "Withdrawal", 2);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 		calc = clientsinfo[saveTracker].figs3.close += curr;
@@ -499,7 +526,7 @@ if(strcmp(firstWord, "DEPOSITSAV") == 0) {
 	float calc = clientsinfo[saveTracker].figs.close += curr;
 	sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs.close);
 	sprintf(buf, "\n\nDeposit Completed: Closing Balance : %s" , onlineClose);
-	append_transaction(atoi(onlineAc1), 0, curr, "Deposit");
+	append_transaction(atoi(onlineAc1), atoi(onlineAc1), curr, "Deposit" , 3);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 	write(sock, "You cannot deposit more than $1000.00 in a single transaction!", strlen("You cannot deposit more than $1000.00 in a single transaction!")+1);
@@ -512,7 +539,7 @@ if(strcmp(firstWord, "DEPOSITLOAN") == 0) {
 	float calc = clientsinfo[saveTracker].figs2.close += curr;
 	sprintf(onlineClose2, "%.2lf", clientsinfo[saveTracker].figs2.close);
 	sprintf(buf, "\n\nDeposit Completed: Closing Balance : %s" , onlineClose2);
-	append_transaction(atoi(onlineAc2), 0, curr, "Deposit");
+	append_transaction(atoi(onlineAc2), atoi(onlineAc2), curr, "Deposit" , 3);
 	 write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 	write(sock, "You cannot deposit more than $1000.00 in a single transaction!", strlen("You cannot deposit more than $1000.00 in a single transaction!")+1);
@@ -525,7 +552,7 @@ if(strcmp(firstWord, "DEPOSITCREDIT") == 0) {
 	float calc = clientsinfo[saveTracker].figs3.close += curr;
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\nDeposit Completed: Closing Balance : %s" , onlineClose3);
-	append_transaction(atoi(onlineAc3), 0, curr, "Deposit");
+	append_transaction(atoi(onlineAc3), atoi(onlineAc3), curr, "Deposit", 3);
 	 write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 	write(sock, "You cannot deposit more than $1000.00 in a single transaction!", strlen("You cannot deposit more than $1000.00 in a single transaction!")+1);
@@ -543,7 +570,7 @@ if(strcmp(firstWord, "SINTERNALC") == 0){
 	sprintf(onlineClose3, "%.2lf", clientsinfo[saveTracker].figs3.close);
 	sprintf(buf, "\n\nINTERNAL TRANSFER\n\n\nDeducted %.2lf From: Account - %s Closing Balance - %.2lf\nTransfer %.2lf Dest: Account - %s - Closing Balance - %s" , curr, onlineAc1, clientsinfo[saveTracker].figs.close, curr, onlineAc3, onlineClose3);
 	write(sock, buf, strlen(buf)+1);
-	append_transaction(atoi(onlineAc3),atoi(onlineAc1), curr, "Transfer");
+	append_transaction(atoi(onlineAc3),atoi(onlineAc1), curr, "Transfer", 4);
 
 }else{
 		calc = clientsinfo[saveTracker].figs.close += curr;
@@ -559,7 +586,7 @@ if(strcmp(firstWord, "SINTERNALC") == 0){
 	if(clientsinfo[saveTracker].figs3.close >= -5000){
 	clientsinfo[saveTracker].figs.close += curr;
 	sprintf(buf, "\n\nINTERNAL TRANSFER\n\n\nDeducted %.2lf From: Account - %d Closing Balance - %.2lf\nTransfer %.2lf Dest: Account - %d - Closing Balance - %.2lf" , curr, clientsinfo[saveTracker].account3, clientsinfo[saveTracker].figs3.close, curr, clientsinfo[saveTracker].account1, clientsinfo[saveTracker].figs.close);
-	append_transaction(atoi(onlineAc1), atoi(onlineAc3), curr, "Transfer");
+	append_transaction(atoi(onlineAc1), atoi(onlineAc3), curr, "Transfer" , 4);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 		calc = clientsinfo[saveTracker].figs3.close += curr;
@@ -577,7 +604,7 @@ if(strcmp(firstWord, "SINTERNALC") == 0){
 	if(clientsinfo[saveTracker].figs3.close >= -5000){
 	clientsinfo[saveTracker].figs2.close += curr;
 	sprintf(buf, "\n\nINTERNAL TRANSFER\n\n\nDeducted %.2lf From: Account - %d Closing Balance - %.2lf\nTransfer %.2lf Dest: Account - %d - Closing Balance - %.2lf" , curr, clientsinfo[saveTracker].account3, clientsinfo[saveTracker].figs3.close, curr, clientsinfo[saveTracker].account2, clientsinfo[saveTracker].figs2.close);
-	append_transaction(atoi(onlineAc2), atoi(onlineAc3), curr, "Transfer");
+	append_transaction(atoi(onlineAc2), atoi(onlineAc3), curr, "Transfer", 4);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 		calc = clientsinfo[saveTracker].figs3.close += curr;
@@ -599,7 +626,7 @@ if(strcmp(firstWord, "SINTERNALL") == 0){
 	sprintf(onlineClose2, "%.2lf", clientsinfo[saveTracker].figs2.close);
 	sprintf(buf, "\n\nINTERNAL TRANSFER\n\n\nDeducted %.2lf From: Account - %s Closing Balance - %.2lf\nTransfer %.2lf Dest: Account - %s - Closing Balance - %s" , curr, onlineAc1, clientsinfo[saveTracker].figs.close, curr, onlineAc3, onlineClose2);
 	write(sock, buf, strlen(buf)+1);
-	append_transaction(atoi(onlineAc2),atoi(onlineAc1), curr, "Transfer");
+	append_transaction(atoi(onlineAc2),atoi(onlineAc1), curr, "Transfer", 4);
 
 }else{
 		calc = clientsinfo[saveTracker].figs.close += curr;
@@ -634,8 +661,8 @@ write(sock, "\n\n\nThere is currently no transaction history", strlen("There is 
 
 if(strcmp(firstWord, "TRANSACTIONS") == 0 && transactions != NULL) {
 	int transCount = 0;
-	for(int k = 0; k <= sizeof(transactions); k++){
-	if(atoi(secondWord) == transactions[k].fromAccount || atoi(secondWord) == transactions[k].toAccount){
+	for(int k = 0; k <= tranSize; k++){
+	if((atoi(secondWord) == transactions[k].fromAccount || atoi(secondWord) == transactions[k].toAccount) ){
 	transCount++;
 }
 }
@@ -655,33 +682,33 @@ if(atoi(secondWord) % 13 == 0){
 	int count = 0;
 	int count1 = 0;
 	int count2 = 0;
-	for(int i = 0; i <= sizeof(transactions); i++){
-	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 11 == 0) {
+	for(int i = 0; i <= tranSize; i++){
+	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 11 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 2)) {
 	count++;
 	sprintf(buf, "\n   %d     \t%s     \t$-%.2lf " , count,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));	
 }
-	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 11 == 0){
+	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 11 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3)){
 	count++;
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " ,  count ,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));
 }
-	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 12 == 0) {
+	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 12 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 2)) {
 	count1++;
 	sprintf(buf, "\n   %d     \t%s     \t$-%.2lf " , count1,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));	
 }
-	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 12 == 0){
+	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 12 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3)){
 	count1++;
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " ,  count1 ,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));
 }
-	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 13 == 0) {
+	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 13 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 2)) {
 	count2++;
 	sprintf(buf, "\n   %d     \t%s     \t$-%.2lf " , count2,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));	
 }
-	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 13 == 0){
+	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 13 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3)){
 	count2++;
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " ,  count2 ,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));
@@ -710,7 +737,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs.close += curr;
 // APPEND TRANSACTION
-append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("WOO HOO TRANSFER BABY");
 break;
@@ -721,7 +748,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs2.close += curr;
 // APPEND TRANSACTION
-append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
@@ -733,7 +760,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs3.close += curr;
 // APPEND TRANSACTION
-append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer");
+append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
@@ -767,7 +794,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs.close += curr;
 // APPEND TRANSACTION
-append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer");
+append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
@@ -779,7 +806,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs2.close += curr;
 // APPEND TRANSACTION
-append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer");
+append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
@@ -791,7 +818,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs3.close += curr;
 // APPEND TRANSACTION
-append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer");
+append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
@@ -883,7 +910,18 @@ int main(int argc, char *argv[]) {
 		perror("listen");
 		exit(1);
 	}
+//////////////////////////////////////////////////////////////////////////////////////////
+	    if (pthread_mutex_init(&lock, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
 
+		    if (pthread_mutex_init(&lock2, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
 	printf("server starts listnening ...\n");
 
 	//Fills the clients structre , username , pin , clientNum
@@ -921,6 +959,9 @@ int main(int argc, char *argv[]) {
 	}
 
 	}
+	close(new_fd);
+	pthread_mutex_destroy(&lock);
+	pthread_mutex_destroy(&lock2);
 	return 0;
 
 }

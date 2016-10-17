@@ -1,0 +1,2 @@
+FromAccount      ToAccount       TranType    Amount
+14532364      14532364       Withdrawal    100.00
