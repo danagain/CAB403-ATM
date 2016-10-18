@@ -95,6 +95,54 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, i
 	#define RETURNED_ERROR -1
 
 
+void tokenTrans(){
+trans = fopen("Transactions.txt", "r");
+char c;
+char str[100];
+int from;
+int to;
+char type[15];
+float amount;
+int itype;
+int chk;
+
+do{
+    c = fgetc(trans);
+  } while (c != '\n');
+
+  while (fgets(str, 100, trans)) {
+
+chk = sscanf(str,"%d %d %s %f", &from, &to, type, &amount);
+	if(atoi(type) == 2)
+	{
+	itype = 2;
+	strcpy(type, "Withdraw");
+	}
+	
+		if(atoi(type) == 3)
+	{
+	itype = 3;
+	strcpy(type, "Deposit");
+	}
+
+		if(atoi(type) == 4)
+	{
+	itype = 4;
+	strcpy(type, "Transfer");
+	}
+	if(chk < 1 ){
+		break;
+		}
+
+append_transaction(from, to, amount, type, itype);
+
+}
+
+fclose(trans);
+}
+
+
+
 
 void writeTrans(){
 pthread_mutex_lock(&lock2);
@@ -108,6 +156,7 @@ pthread_mutex_unlock(&lock2);
 
 
 void writeAccounts(int i){
+pthread_mutex_lock(&lock2);
 accountsFile = fopen("Accounts.txt", "w+");
 
 for(int k = 0; k < 24; k++){
@@ -132,6 +181,7 @@ fprintf(accountsFile,"%d     %10.2lf     %10.2lf\n", accounts[j].accNum, account
 //printf("\n%d       %10.2lf         %10.2lf ", accounts[j].accNum , accounts[j].openBal, accounts[j].closeBal);
 }
 fclose(accountsFile);
+pthread_mutex_unlock(&lock2);
 }
 
 
@@ -454,8 +504,12 @@ tracker++;
       }
 
 
+	
 
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	tokenTrans();
     //Receive a message from client
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 )
     {
