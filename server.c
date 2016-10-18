@@ -98,17 +98,41 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, i
 
 void writeTrans(){
 pthread_mutex_lock(&lock2);
-trans = fopen("Transactions.txt", "wb");
-fprintf(trans, "FromAccount      ToAccount       TranType    Amount\n");
+trans = fopen("Transactions.txt", "a");
 for(int i = 0; i < tranSize; i++ ) {
-fprintf(trans, "%d      %d       %s    %.2lf\n",transactions[i].fromAccount, transactions[i].toAccount, transactions[i].transType, transactions[i].amount);
+fprintf(trans, "%d         %d          %d         %.2lf\n",transactions[i].fromAccount, transactions[i].toAccount, transactions[i].tType, transactions[i].amount);
 }
 fclose(trans);
 pthread_mutex_unlock(&lock2);
 }
 
 
+void writeAccounts(int i){
+accountsFile = fopen("Accounts.txt", "w+");
 
+for(int k = 0; k < 24; k++){
+if(clientsinfo[i].account1 == accounts[k].accNum)
+{
+	accounts[k].closeBal = clientsinfo[i].figs.close;
+}
+if(clientsinfo[i].account2 == accounts[k].accNum)
+{
+	accounts[k].closeBal = clientsinfo[i].figs2.close;
+}
+if(clientsinfo[i].account3 == accounts[k].accNum)
+{
+	accounts[k].closeBal = clientsinfo[i].figs3.close;
+}
+
+}
+
+fprintf(accountsFile,"AccountNo      OpeningBal     ClosingBal   \n");
+for(int j = 0; j < 24; j++){
+fprintf(accountsFile,"%d     %10.2lf     %10.2lf\n", accounts[j].accNum, accounts[j].openBal, accounts[j].closeBal);
+//printf("\n%d       %10.2lf         %10.2lf ", accounts[j].accNum , accounts[j].openBal, accounts[j].closeBal);
+}
+fclose(accountsFile);
+}
 
 
 
@@ -278,10 +302,8 @@ void sendStrings(int socket_id, char * theArray, int length) {
     send(socket_id, & characters, sizeof(char), 0);
   }
 
-  for (i = 0; i < 1; i++) {
     characters = strlen(theArray) + '0';
     send(socket_id, & characters, sizeof(char), 0);
-  }
 }
 
 
@@ -445,6 +467,7 @@ tracker++;
 
 	if(strcmp(firstWord, "CLIENTCLOSE") == 0) {
 		writeTrans();
+		writeAccounts(saveTracker);
 	}
 	
 

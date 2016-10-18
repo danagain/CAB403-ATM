@@ -688,7 +688,7 @@ while(1){
 	bool exitSav = false;
 	char* withdrawal;
 	printf(" Savings Balance Selected - > Send savings Withdrawal variable to server \n");
-	printf("\n\nHow much would you like to WITHDRAW: ");
+	printf("\nEnter the Amount to Transfer (E/e to exit) - $");
 	scanf("%s" ,message);
 	if(exitMenu(ans,ans2,message,buf) == true){
 	selection = true;
@@ -728,7 +728,7 @@ break;
 	char* withdrawal;
 	bool exitCredit = false;
 	printf(" Credit Balance Selected - > Send savings Withdrawal variable to server \n");
-	printf("\n\nHow much would you like to WITHDRAW: ");
+	printf("\nEnter the Amount to Transfer (E/e to exit) - $");
 	scanf("%s" ,message);
 	if(exitMenu(ans,ans2,message,buf) == true){
 	selection = true;
