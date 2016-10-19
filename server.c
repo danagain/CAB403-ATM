@@ -3,7 +3,7 @@
 *  Collected and modified for teaching purpose only by Jinglan Zhang, Aug. 2006
 */
 
-
+#include <signal.h>
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,6 +56,8 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, i
     int clientNumber;
   };
   struct Clients clients[14];
+
+
 
   //CLIENT INFO STRUCT
   struct ClientsInfo {
@@ -146,7 +148,8 @@ fclose(trans);
 
 void writeTrans(){
 pthread_mutex_lock(&lock2);
-trans = fopen("Transactions.txt", "a");
+trans = fopen("Transactions.txt", "w+");
+fprintf(trans,"FromAccount      ToAccount       TranType    Amount\n");
 for(int i = 0; i < tranSize; i++ ) {
 fprintf(trans, "%d         %d          %d         %.2lf\n",transactions[i].fromAccount, transactions[i].toAccount, transactions[i].tType, transactions[i].amount);
 }
@@ -182,6 +185,23 @@ fprintf(accountsFile,"%d     %10.2lf     %10.2lf\n", accounts[j].accNum, account
 }
 fclose(accountsFile);
 pthread_mutex_unlock(&lock2);
+}
+
+void serverShutdown(){
+printf("Exiting Gracefully");
+//Save all the client balances & transactions
+printf("\nSaving all the client data");
+writeTrans();
+//writeAccounts(saveTracker);
+//deallocate dynamically allocated memory
+printf("\nDeallocating memory");
+free(transactions);
+//joining threads
+
+
+
+
+
 }
 
 
@@ -509,7 +529,7 @@ tracker++;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	tokenTrans();
+	
     //Receive a message from client
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 )
     {
@@ -520,8 +540,8 @@ tracker++;
 	printf("Client input %s, First word %s, Second word %s\n", client_message, firstWord, secondWord);
 
 	if(strcmp(firstWord, "CLIENTCLOSE") == 0) {
-		writeTrans();
 		writeAccounts(saveTracker);
+		writeTrans();
 	}
 	
 
@@ -1007,6 +1027,8 @@ int main(int argc, char *argv[]) {
 	fillClientsInfo();
 	//Fills the accounts structure
 	fillAccounts();
+	//fill the transactions
+	tokenTrans();
 	int counter = 0;
 	/* repeat: accept, send, close the connection */
 	/* for every accepted connection, use a sepetate process or thread to serve it */
