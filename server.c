@@ -18,31 +18,103 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-
+//Defines
 #define NUM_HANDLER_THREADS 2
+#define BACKLOG 10     /* how many pending connections queue will hold */
+#define RETURNED_ERROR -1
 
+//Function Declerations
 void handle_request();
 
+//Variables
 FILE * clientDetails;
 FILE * toAuthenticate;
 FILE * accountsFile;
 FILE * trans;
 pthread_mutex_t lock;
 pthread_mutex_t lock2;
-
 int sockfd;
+int tranSize = 0;
+int num_requests = 0;   /* number of pending requests, initially none */
+/* global mutex for our program. assignment initializes it. */
+/* note that we use a RECURSIVE mutex, since a handler      */
+/* thread might try to lock it twice consecutively.         */
+pthread_mutex_t request_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
+/* global condition variable for our program. assignment initializes it. */
+pthread_cond_t  got_request   = PTHREAD_COND_INITIALIZER;
 
-  //TRANSACTIONS STRUCT
- typedef struct Transactions{
+
+//Structs
+
+//Transaction Struct
+typedef struct Transactions{
 	int fromAccount;
 	int toAccount;
 	float amount;
 	char transType[15];
 	int tType;
-  }Transactions;
+}Transactions;
 Transactions* transactions = NULL;
-	int tranSize = 0;
 
+//Clients Authentication Struct
+struct Clients {
+    char username[15];
+    int pinNumber;
+    int clientNumber;
+};
+struct Clients clients[14];
+
+//Clients Information Struct
+struct ClientsInfo {
+char name[15];
+char surname[15];
+int clientnum;
+struct Figs{
+	float open;
+	float close;
+}figs;
+struct Figs2{
+	float open;
+	float close;
+}figs2;
+struct Figs3{
+	float open;
+	float close;
+}figs3;
+int account1;
+int account2;
+int account3;
+int online;
+  };
+  struct ClientsInfo clientsinfo[10];
+
+//Accounts Struct
+struct Accounts{
+int accNum;
+float openBal;
+float closeBal;
+};
+struct Accounts accounts[24];
+
+//Requests Struct for Thread Pool
+struct request {
+    int number;             /* number of the request                  */
+    struct request* next;   /* pointer to next request, NULL if none. */
+};
+
+struct request* requests = NULL;     /* head of linked list of requests. */
+struct request* last_request = NULL; /* pointer to last request.         */
+
+
+
+/*
+ * function append_transaction(): add a transaction to a dynamicly increasing array
+ * algorithm: Reallocates memory to the original size + 1 and then stores all 
+ * 	       The inputs into the new element dynamically allocated.
+ *
+ * input:     toAccount, fromAccount, amount, transType, ttype
+ * output:    none.
+ */
 void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, int ttype)
 	{	pthread_mutex_lock(&lock);
 		int pos = tranSize;
@@ -55,72 +127,8 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, i
 		transactions[pos].tType = ttype;
 		 pthread_mutex_unlock(&lock);
 	}
-  //AUTH STRUCT
-  struct Clients {
-    char username[15];
-    int pinNumber;
-    int clientNumber;
-  };
-  struct Clients clients[14];
 
 
-
-  //CLIENT INFO STRUCT
-  struct ClientsInfo {
-    char name[15];
-    char surname[15];
-    int clientnum;
-		struct Figs{
-		float open;
-		float close;
-		}figs;
-	struct Figs2{
-		float open;
-		float close;
-		}figs2;
-	struct Figs3{
-		float open;
-		float close;
-		}figs3;
-    int account1;
-    int account2;
-    int account3;
-	int online;
-  };
-  struct ClientsInfo clientsinfo[10];
-
-
-	struct Accounts{
-		int accNum;
-		float openBal;
-		float closeBal;
-	};struct Accounts accounts[24];
-
-
-	#define ARRAY_SIZE 30  /* Size of array to receive */
-
-	#define BACKLOG 10     /* how many pending connections queue will hold */
-
-	#define RETURNED_ERROR -1
-
-/* global mutex for our program. assignment initializes it. */
-/* note that we use a RECURSIVE mutex, since a handler      */
-/* thread might try to lock it twice consecutively.         */
-pthread_mutex_t request_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-
-/* global condition variable for our program. assignment initializes it. */
-pthread_cond_t  got_request   = PTHREAD_COND_INITIALIZER;
-
-int num_requests = 0;   /* number of pending requests, initially none */
-
-/* format of a single request. */
-struct request {
-    int number;             /* number of the request                  */
-    struct request* next;   /* pointer to next request, NULL if none. */
-};
-
-struct request* requests = NULL;     /* head of linked list of requests. */
-struct request* last_request = NULL; /* pointer to last request.         */
 
 /*
  * function add_request(): add a request to the requests list
@@ -259,14 +267,9 @@ void* handle_requests_loop(void* data)
 
 void tokenTrans(){
 trans = fopen("Transactions.txt", "r");
-char c;
-char str[100];
-int from;
-int to;
-char type[15];
+char str[100], type[15], c;
+int from, to, itype, chk;
 float amount;
-int itype;
-int chk;
 
 do{
     c = fgetc(trans);
@@ -297,9 +300,7 @@ chk = sscanf(str,"%d %d %s %f", &from, &to, type, &amount);
 		}
 
 append_transaction(from, to, amount, type, itype);
-
 }
-
 fclose(trans);
 }
 
@@ -376,6 +377,8 @@ fclose(accountsFile);
 pthread_mutex_unlock(&lock2);
 }
 
+
+
 void serverShutdown(int sig){
 printf("Exiting Gracefully");
 //Save all the client balances & transactions
@@ -390,8 +393,6 @@ printf("\nClosing Socket");
     close(sockfd);
 printf("\nExiting");
     exit(EXIT_SUCCESS);
-
-
 }
 
 
@@ -567,6 +568,8 @@ void sendStrings(int socket_id, char * theArray, int length) {
 }
 
 
+
+
 /*
  * function handle_request(): handle a single given request.
  * algorithm: prints a message stating that the given thread handled
@@ -577,7 +580,7 @@ void sendStrings(int socket_id, char * theArray, int length) {
 void handle_request(struct request* a_request, int thread_id)
 {
     if (a_request) {
-
+//Local Variables for thread
 bool login = false;
 bool correctAc = false;
 char saveAcNum[20];
@@ -595,12 +598,14 @@ char onlineOpen2[14];
 char onlineClose2[14];
 char onlineClose3[14];
 
-    //Get the socket descriptor
-	puts("thread handling");
-    int sock = a_request->number;
-    int read_size;
-    char *message , client_message[2000], user[15];
-	char* resultss = Receive_Array_char_Data(sock, 30);
+//Let server know thread is been handled
+puts("thread handling");
+
+//Get the socket descriptor
+int sock = a_request->number;
+int read_size;
+char *message , client_message[2000], user[15];
+char* resultss = Receive_Array_char_Data(sock, 30);
 	for(int i = 0 ; i< 30; i++){
 	printf("array[%d] %c\n",i, resultss[i]);
 	}
@@ -624,12 +629,6 @@ char onlineClose3[14];
       int sentPin;
       sscanf(pinEntered, "%d", & sentPin);
       printf("Pin Send :   %i\n\n ", sentPin);
-
-      //CHECKING WHATS GOING ON
-      printf("%c\n\n", arrayLim);
-      printf("%c\n\n", arrayLim2);
-      printf("%s\n\n", pinEntered);
-      printf("%i\n\n", intval);
 	int tracker = 0;
 
 
@@ -1162,6 +1161,8 @@ else{
 
     }
 }
+
+
 int main(int argc, char *argv[]) {
 	//if ctrl+c is pressed
 
