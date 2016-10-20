@@ -1113,9 +1113,11 @@ clientsinfo[i].figs.close += curr;
 if(clientsinfo[i].figs.close -= curr > 0){
 append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
 }
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
+printf("%s", secondWord);
+printf("WOO HOO TRANSFER BABY");
 break;
 }
-
 if(clientsinfo[i].account2 > 1 && clientsinfo[i].account2 == atoi(saveAcNum) && clientsinfo[i].account2 != clientsinfo[saveTracker].account1 && clientsinfo[i].account2 != clientsinfo[saveTracker].account2 && clientsinfo[i].account2 != clientsinfo[saveTracker].account3){
 correctAc = true;
 char* store;
@@ -1125,9 +1127,11 @@ clientsinfo[i].figs2.close += curr;
 if(clientsinfo[i].figs3.close -= curr > 0){
 append_transaction(atoi(saveAcNum), atoi(onlineAc2), curr, "Transfer", 4);
 }
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
+printf("%s", secondWord);
+printf("WOO HOO TRANSFER BABY");
 break;
 }
-
 if(clientsinfo[i].account3 > 1 && clientsinfo[i].account3 == atoi(saveAcNum) && clientsinfo[i].account3 != clientsinfo[saveTracker].account1 && clientsinfo[i].account3 != clientsinfo[saveTracker].account2 && clientsinfo[i].account3 != clientsinfo[saveTracker].account2){
 correctAc = true;
 char* store;
@@ -1137,6 +1141,9 @@ clientsinfo[i].figs3.close += curr;
 if(clientsinfo[i].figs3.close -= curr > 0){
 append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 }
+printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
+printf("%s", secondWord);
+printf("WOO HOO TRANSFER BABY");
 break;
 }
 
@@ -1159,11 +1166,22 @@ sprintf(onlineClose, "%.2lf", clientsinfo[saveTracker].figs3.close );
 sprintf(buf, "\n\n You sent $%s to account number %s",secondWord, saveAcNum);
 write(sock , buf , strlen(buf)+1);
 }
+
+
+
+
+
+
+
 }
-}else{
-	 write(sock , "" , strlen("")+1);
 }
 
+
+else{
+	 write(sock , "" , strlen("")+1);
+}
+       // write(sock , client_message , strlen(client_message)+1); }
+	//memset(client_message,"\n",sizeof(client_message));
     }
 
     if(read_size == 0)
