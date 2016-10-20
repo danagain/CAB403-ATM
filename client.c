@@ -382,6 +382,7 @@ void Send_Username(int socket_id, char *myArray, char *myArray2) {
 	for (i = 0; i < 15; i++) {
 		names = myArray[i];
 		send(socket_id, &names, sizeof(char), 0);
+
 	}
 	for (i = 0; i < 13; i++) {
 		names = myArray2[i];
