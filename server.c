@@ -25,6 +25,7 @@ FILE * trans;
 pthread_mutex_t lock;
 pthread_mutex_t lock2;
 
+int sockfd;
 
   //TRANSACTIONS STRUCT
  typedef struct Transactions{
@@ -79,6 +80,7 @@ void append_transaction(int toAcc, int fromAcc, float amount, char* transtype, i
     int account1;
     int account2;
     int account3;
+	int online;
   };
   struct ClientsInfo clientsinfo[10];
 
@@ -157,6 +159,35 @@ fclose(trans);
 pthread_mutex_unlock(&lock2);
 }
 
+void writeAccountsShutdown(){
+accountsFile = fopen("Accounts.txt", "w+");
+
+for(int i = 0; i < 10 ; i++){
+for(int k = 0; k < 24; k++){
+if(clientsinfo[i].account1 == accounts[k].accNum && clientsinfo[i].online == 1)
+{
+	accounts[k].closeBal = clientsinfo[i].figs.close;
+}
+if(clientsinfo[i].account2 == accounts[k].accNum && clientsinfo[i].online == 1)
+{
+	accounts[k].closeBal = clientsinfo[i].figs2.close;
+}
+if(clientsinfo[i].account3 == accounts[k].accNum && clientsinfo[i].online == 1)
+{
+	accounts[k].closeBal = clientsinfo[i].figs3.close;
+}
+
+}
+}
+
+fprintf(accountsFile,"AccountNo      OpeningBal     ClosingBal   \n");
+for(int j = 0; j < 24; j++){
+fprintf(accountsFile,"%d     %10.2lf     %10.2lf\n", accounts[j].accNum, accounts[j].openBal, accounts[j].closeBal);
+//printf("\n%d       %10.2lf         %10.2lf ", accounts[j].accNum , accounts[j].openBal, accounts[j].closeBal);
+}
+fclose(accountsFile);
+}
+
 
 void writeAccounts(int i){
 pthread_mutex_lock(&lock2);
@@ -187,19 +218,20 @@ fclose(accountsFile);
 pthread_mutex_unlock(&lock2);
 }
 
-void serverShutdown(){
+void serverShutdown(int sig){
 printf("Exiting Gracefully");
 //Save all the client balances & transactions
 printf("\nSaving all the client data");
 writeTrans();
-//writeAccounts(saveTracker);
+writeAccountsShutdown();
 //deallocate dynamically allocated memory
 printf("\nDeallocating memory");
 free(transactions);
 //joining threads
-
-
-
+printf("\nClosing Socket");
+    close(sockfd);
+printf("\nExiting");
+    exit(EXIT_SUCCESS);
 
 
 }
@@ -458,6 +490,8 @@ char onlineClose3[14];
             //matching users client number against client details struct
             //converting acc nums to char arrays
             if (usersClientNum == clientsinfo[i].clientnum) {
+		//client is onliine
+		clientsinfo[i].online = 1;
               sprintf(onlineCnum, "%d", usersClientNum);
               sprintf(onlineAc1, "%d", clientsinfo[i].account1);
               sprintf(onlineAc2, "%d", clientsinfo[i].account2);
@@ -965,13 +999,17 @@ else{
 
 }
 int main(int argc, char *argv[]) {
+	//if ctrl+c is pressed
 
+	 signal(SIGINT, serverShutdown);
+
+	
 	/* Thread and thread attributes */
 	pthread_t client_thread;
 	pthread_attr_t attr;
 
 
-	int sockfd, new_fd, *newestSock;  /* listen on sock_fd, new connection on new_fd */
+	int new_fd, *newestSock;  /* listen on sock_fd, new connection on new_fd */
 	struct sockaddr_in my_addr;    /* my address information */
 	struct sockaddr_in their_addr; /* connector's address information */
 	socklen_t sin_size;
