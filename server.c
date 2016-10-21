@@ -44,6 +44,7 @@ pthread_mutex_t request_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 pthread_cond_t  got_request   = PTHREAD_COND_INITIALIZER;
 
 
+
 //Structs
 
 //Transaction Struct
@@ -1190,8 +1191,8 @@ int main(int argc, char *argv[]) {
 
 	 signal(SIGINT, serverShutdown);
                              /* loop counter          */
-   	 int        thr_id[NUM_HANDLER_THREADS];      /* thread IDs            */
-    	pthread_t  p_threads[NUM_HANDLER_THREADS];   /* thread's structures   */
+	pthread_t  p_threads[NUM_HANDLER_THREADS];   /* thread's structures   */
+	int        thr_id[NUM_HANDLER_THREADS];      /* thread IDs            */
 	/* Thread and thread attributes */
 	//pthread_t client_thread;
 	//pthread_attr_t attr;
