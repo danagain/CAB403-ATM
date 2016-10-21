@@ -904,7 +904,7 @@ if(strcmp(firstWord, "SINTERNALC") == 0){
 	float curr = strtod((secondWord),&store);
 	float calc = clientsinfo[saveTracker].figs3.close -= curr;
 	//If the transfer amount doesn't put the credit account below the maximum daily limit of -5000
-	if(clientsinfo[saveTracker].figs3.close >= -5000){
+	if(clientsinfo[saveTracker].figs3.close <= clientsinfo[saveTracker].figs3.open - 5000){
 	clientsinfo[saveTracker].figs2.close += curr;
 	sprintf(buf, "\n\nINTERNAL TRANSFER\n\n\nDeducted %.2lf From: Account - %d Closing Balance - %.2lf\nTransfer %.2lf Dest: Account - %d - Closing Balance - %.2lf" , curr, clientsinfo[saveTracker].account3, clientsinfo[saveTracker].figs3.close, curr, clientsinfo[saveTracker].account2, clientsinfo[saveTracker].figs2.close);
 	append_transaction(atoi(onlineAc2), atoi(onlineAc3), curr, "Transfer", 4);
@@ -1110,7 +1110,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs.close += curr;
 // APPEND TRANSACTION
-if(clientsinfo[i].figs.close -= curr > 0){
+if(clientsinfo[saveTracker].figs.close <= clientsinfo[saveTracker].figs3.open - 5000){
 append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
 }
 break;
@@ -1122,7 +1122,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs2.close += curr;
 // APPEND TRANSACTION
-if(clientsinfo[i].figs3.close -= curr > 0){
+if(clientsinfo[saveTracker].figs2.close <= clientsinfo[saveTracker].figs3.open - 5000){
 append_transaction(atoi(saveAcNum), atoi(onlineAc2), curr, "Transfer", 4);
 }
 break;
@@ -1134,7 +1134,7 @@ char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[i].figs3.close += curr;
 // APPEND TRANSACTION
-if(clientsinfo[i].figs3.close -= curr > 0){
+if(clientsinfo[saveTracker].figs3.close <= clientsinfo[saveTracker].figs3.open - 5000){
 append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 }
 break;
@@ -1150,7 +1150,7 @@ if(correctAc == true){
 char* store;
 float curr = strtod((secondWord),&store);
 clientsinfo[saveTracker].figs3.close-=curr;
-if(clientsinfo[saveTracker].figs3.close < 0){
+if(clientsinfo[saveTracker].figs3.close <= clientsinfo[saveTracker].figs3.open - 5000){
 clientsinfo[saveTracker].figs3.close+=curr;
 sprintf(buf, "\ninsufficient Funds - Unable To Process Request");
 write(sock , buf , strlen(buf)+1);
