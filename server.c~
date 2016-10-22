@@ -43,10 +43,7 @@ pthread_mutex_t request_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
 /* global condition variable for our program. assignment initializes it. */
 pthread_cond_t  got_request   = PTHREAD_COND_INITIALIZER;
 
-
-
 //Structs
-
 //Transaction Struct
 typedef struct Transactions{
 	int fromAccount;
@@ -379,7 +376,8 @@ fclose(accountsFile);
  * input:     saveTracker, which is the index of the clients_info struct array in which the client logged on is located
  * output:    none.
  */
-void writeAccounts(int i){
+void writeAccounts(int i){ 
+
 pthread_mutex_lock(&lock2);
 accountsFile = fopen("Accounts.txt", "w+");
 
@@ -407,6 +405,14 @@ fclose(accountsFile);
 pthread_mutex_unlock(&lock2);
 }
 
+/*
+ * function serverShutdown(): 
+ * algorithm: catches the ctrl+c signal and performs routine shutdown procedures
+ * 	       
+ *
+ * input:     SIGINT
+ * output:    none.
+ */
 void serverShutdown(int sig){
 printf("Exiting Gracefully");
 //Save all the client balances & transactions
@@ -422,7 +428,14 @@ printf("\nClosing Socket");
 printf("\nExiting");
     exit(EXIT_SUCCESS);
 }
-
+/*
+ * function balance(): 
+ * algorithm: if client requests balance, server handles it
+ * 	       
+ *
+ * input:     Many many things.
+ * output:    none.
+ */
 void balance(char* first, char* second, char* buffer, char* Ac1, char* Ac2, char* Ac3, char* Name, int save, char* Surname, int sock){
 	if(strcmp(first, "BALANCE") == 0 && strcmp(second, "SAVINGS") == 0) {
 	sprintf(buffer, "\n\n %s %s Your balance for account %s is  $%.2lf", Name, Surname, Ac1 , clientsinfo[save].figs.close);
@@ -440,7 +453,14 @@ void balance(char* first, char* second, char* buffer, char* Ac1, char* Ac2, char
 }
 
 }
-
+/*
+ * function fillClients(): 
+ * algorithm: Populates the clients struct by tokenizing the Authentication.txt
+ * 	       
+ *
+ * input:     none.
+ * output:    none.
+ */
 void fillClients(){
 char usernameSaved[15];
 int pin;
@@ -472,7 +492,14 @@ char x;
   }
 fclose(toAuthenticate);
 }
-
+/*
+ * function fillClientsInfo(): 
+ * algorithm: Populates the clients_info struct for each client by tokenizing client_details.txt
+ * 	       
+ *
+ * input:     none.
+ * output:    none.
+ */
 void fillClientsInfo(){
   char str[100];
   char c;
@@ -550,7 +577,14 @@ do{
   }
 	fclose(clientDetails);
 }
-
+/*
+ * function fillAccounts(): 
+ * algorithm: Populates  the accounts struct with data from Accounts.txt
+ * 	       
+ *
+ * input:     none.
+ * output:    none.
+ */
 void fillAccounts(){
 int cnt3 = 0;
 char x;
@@ -579,7 +613,14 @@ printf("\n acc = %i open = %f close = %f \n" , accounts[i].accNum, accounts[i].o
 }
 	fclose(accountsFile);
 }
-
+/*
+ * function Receive_Array_char_Data(): 
+ * algorithm: Receives data from a client send and stores it into an array resultss
+ * 	       
+ *
+ * input:     socket, size.
+ * output:    resultss.
+ */
 char * Receive_Array_char_Data(int socket_identifier, int size) {
   int number_of_bytes, i = 0;
   char names;
@@ -981,14 +1022,8 @@ write(sock, "\n\n\nThere is currently no transaction history", strlen("There is 
 	}
 }
 	}
-	/*
-		
- * function handle_request(): handle a single given request.
- * algorithm: prints a message stating that the given thread handled
- *            the given request.
- * input:     request pointer, id of calling thread.
- * output:    none.
- */
+
+
 void handle_request(struct request* a_request, int thread_id)
 {
     if (a_request) {
