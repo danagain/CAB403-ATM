@@ -1,10 +1,14 @@
-CCFLAGS = -ggdb -pthread
+all:
+	gcc -pthread -o server server.c 
+	gcc -o client client.c 
 
-server: server.c 
-	gcc $(CCFLAGS) server.c -o server
-	
-client: client.c
-	gcc -ggdb client.c -o client
-	
+clientgdb:
+	gcc -o client client.c 
+
+servergdb:
+	gcc -pthread -o server server.c 
+
+
 clean:
-	rm -rf server client 
+	rm server
+	rm client

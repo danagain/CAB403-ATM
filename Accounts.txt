@@ -1,4 +1,4 @@
-AccountNo      OpeningBal     ClosingBal     
+AccountNo      OpeningBal     ClosingBal   
 11012342        7815.16        7815.16
 12013464        -256.78        -256.78
 13014586        -165.22        -165.22
