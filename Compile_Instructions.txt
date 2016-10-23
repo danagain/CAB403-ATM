@@ -1,5 +1,7 @@
 Compile instructions: 
 	1. Open Terminal
-	2. Type "make"
-	3. Open server ->  ./server "portnum"
-	4. Open client ->  ./client localhost "portnum"
+	2. cd to folder "danmitch"
+	3. Compile server -> gcc -pthread -o server server.c
+	4. Compile client -> gcc -o client client.c
+	5. Run server -> ./server "portnum"
+	6. Run client -> ./client localhost "portnum"
