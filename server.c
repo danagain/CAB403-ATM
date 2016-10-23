@@ -672,7 +672,7 @@ float curr = strtod((secondWord),&store);
 clientsinfo[i].figs.close += curr;
 // APPEND TRANSACTION
 if(clientsinfo[saveTracker].figs.close <= clientsinfo[saveTracker].figs3.open - 5000){
-append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
+append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 }
 break;
 }
@@ -684,7 +684,7 @@ float curr = strtod((secondWord),&store);
 clientsinfo[i].figs2.close += curr;
 // APPEND TRANSACTION
 if(clientsinfo[saveTracker].figs2.close <= clientsinfo[saveTracker].figs3.open - 5000){
-append_transaction(atoi(saveAcNum), atoi(onlineAc2), curr, "Transfer", 4);
+append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 }
 break;
 }
@@ -822,10 +822,8 @@ float curr = strtod((secondWord),&store);
 clientsinfo[i].figs.close += curr+1;
 // APPEND TRANSACTION
 if(clientsinfo[i].figs.close -= curr > 0){
-append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
+append_transaction(atoi(saveAcNum), clientsinfo[saveTracker].account1, curr, "Transfer", 4);
 }
-printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
-printf("WOO HOO TRANSFER BABY");
 //break;
 }
 if(clientsinfo[i].account2 > 1 && clientsinfo[i].account2 == atoi(saveAcNum) && clientsinfo[i].account2 != clientsinfo[saveTracker].account1 && clientsinfo[i].account2 != clientsinfo[saveTracker].account2 && clientsinfo[i].account2 != clientsinfo[saveTracker].account3){
@@ -835,11 +833,9 @@ float curr = strtod((secondWord),&store);
 clientsinfo[i].figs2.close += curr+1;
 // APPEND TRANSACTION
 if(clientsinfo[i].figs2.close -= curr > 0){
-append_transaction(atoi(saveAcNum), atoi(onlineAc2), curr, "Transfer", 4);
+append_transaction(atoi(saveAcNum), clientsinfo[saveTracker].account1, curr, "Transfer", 4);
 }
-printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
-printf("%s", secondWord);
-printf("WOO HOO TRANSFER BABY");
+
 //break;
 }
 if(clientsinfo[i].account3 > 1 && clientsinfo[i].account3 == atoi(saveAcNum) && clientsinfo[i].account3 != clientsinfo[saveTracker].account1 && clientsinfo[i].account3 != clientsinfo[saveTracker].account2 && clientsinfo[i].account3 != clientsinfo[saveTracker].account2){
@@ -849,11 +845,9 @@ float curr = strtod((secondWord),&store);
 clientsinfo[i].figs3.close += curr+1;
 // APPEND TRANSACTION
 if(clientsinfo[i].figs3.close -= curr > 0){
-append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
+append_transaction(atoi(saveAcNum), clientsinfo[saveTracker].account1, curr, "Transfer", 4);
 }
-printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
-printf("%s", secondWord);
-printf("WOO HOO TRANSFER BABY");
+
 //break;
 }
 
@@ -1230,7 +1224,7 @@ tracker++;
 	credit_internal(onlineAc1, onlineAc2, onlineAc3, buf, onlineName, onlineSurname, firstWord, secondWord, saveTracker, sock);
 	NUMBER = external(firstWord, secondWord, saveTracker, buf, sock, saveAcNum);
 	transactions_method(firstWord, secondWord, buf, saveTracker, sock);
-	external_from_savings(buf, firstWord, saveAcNum, secondWord, correctAc, onlineAc1, onlineAc2, onlineAc3, saveTracker, sock);
+	external_from_savings(buf, firstWord, NUMBER, secondWord, correctAc, onlineAc1, onlineAc2, onlineAc3, saveTracker, sock);
 	external_from_credit(buf, firstWord, NUMBER, secondWord, correctAc, onlineAc1, onlineAc2, onlineAc3, saveTracker, sock);
     }
     free(resultss);
