@@ -1,0 +1,5 @@
+Compile instructions: 
+	1. Open Terminal
+	2. Type "make"
+	3. Open server ->  ./server "portnum"
+	4. Open client ->  ./client localhost "portnum"
