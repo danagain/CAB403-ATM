@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-
+ 
 char username[30];
 char client_pin[15];
 char input[15];
