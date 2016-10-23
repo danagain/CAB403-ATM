@@ -59,8 +59,7 @@ struct Clients {
     char username[15];
     int pinNumber;
     int clientNumber;
-};
-struct Clients clients[14];
+};struct Clients clients[14];
 
 //Clients Information Struct
 struct ClientsInfo {
@@ -83,23 +82,20 @@ int account1;
 int account2;
 int account3;
 int online;
-  };
-  struct ClientsInfo clientsinfo[10];
+  };struct ClientsInfo clientsinfo[10];
 
 //Accounts Struct
 struct Accounts{
 int accNum;
 float openBal;
 float closeBal;
-};
-struct Accounts accounts[24];
+};struct Accounts accounts[24];
 
 //Requests Struct for Thread Pool
 struct request {
     int number;             /* number of the request                  */
     struct request* next;   /* pointer to next request, NULL if none. */
 };
-
 struct request* requests = NULL;     /* head of linked list of requests. */
 struct request* last_request = NULL; /* pointer to last request.         */
 
@@ -414,16 +410,11 @@ pthread_mutex_unlock(&lock2);
  * output:    none.
  */
 void serverShutdown(int sig){
-printf("Exiting Gracefully");
 //Save all the client balances & transactions
-printf("\nSaving all the client data");
 writeTrans();
 writeAccountsShutdown();
 //deallocate dynamically allocated memory
-printf("\nDeallocating memory");
 free(transactions);
-//joining threads
-printf("\nClosing Socket");
     close(sockfd);
 printf("\nExiting");
     exit(EXIT_SUCCESS);
@@ -488,7 +479,6 @@ char x;
     for (int i = 0; i < 15; i++) {
       clients[cnt].username[i] = usernameSaved[i];
     }
-    printf("clients user %s , clients pin %i\n", clients[cnt].username, clients[cnt].pinNumber);
   }
 fclose(toAuthenticate);
 }
@@ -572,7 +562,6 @@ do{
     if (clientsinfo[cnt2].clientnum == clientsinfo[cnt2 - 1].clientnum) {
       break;
     }
-		printf("\n\n%s %s %d %d %d %d\n\n", detailsname, detailssurname, detailsclientnum, detailsaccount1, detailsaccount2, detailsaccount3);
     cnt2++;
   }
 	fclose(clientDetails);
@@ -607,10 +596,6 @@ do{
       break;}
 	cnt3++;
 	}
-for(int i = 0; i < 24; i++){
-printf("\n acc = %i open = %f close = %f \n" , accounts[i].accNum, accounts[i].openBal, accounts[i].closeBal);
-
-}
 	fclose(accountsFile);
 }
 /*
@@ -635,7 +620,14 @@ char * Receive_Array_char_Data(int socket_identifier, int size) {
   }
   return resultss;
 }
-
+/*
+ * function sendStrings(): 
+ * algorithm: Sends over information to the client in an array, I also send the the length of the
+ * 	       text been sent as the last element in the array
+ *
+ * input:     socket_id, theArray , length
+ * output:    none.
+ */
 void sendStrings(int socket_id, char * theArray, int length) {
   int i = 0;
   char characters;
@@ -647,7 +639,14 @@ void sendStrings(int socket_id, char * theArray, int length) {
     characters = strlen(theArray) + '0';
     send(socket_id, & characters, sizeof(char), 0);
 }
-
+/*
+ * function client_close(): 
+ * algorithm: If the client notifies the server it's quitting then update the transactions and accounts .txt files
+ * 	       
+ *
+ * input:     saveTracker, firstWord
+ * output:    none.
+ */
 void client_close(int saveTracker, char* firstWord){
 	if(strcmp(firstWord, "CLIENTCLOSE") == 0) {
 		writeAccounts(saveTracker);
@@ -655,7 +654,14 @@ void client_close(int saveTracker, char* firstWord){
 	}
 	
 }
-
+/*
+ * function external_from_credit(): 
+ * algorithm: If the client requests an external transaction from their credit account
+ * 	       this function will handle and process the request
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
 void external_from_credit(char* buf, char* firstWord, char* saveAcNum, char* secondWord, bool correctAc, char* onlineAc1, char* onlineAc2, char* onlineAc3, int saveTracker, int sock){
 if(strcmp(firstWord, "AMOUNTC") == 0){
 for(int i = 0; i<10; i++){
@@ -710,7 +716,7 @@ clientsinfo[saveTracker].figs3.close+=curr;
 sprintf(buf, "\ninsufficient Funds - Unable To Process Request");
 write(sock , buf , strlen(buf)+1);
 }else{
-sprintf(buf, "\n\n You sent $%.2lf to account number %s",clientsinfo[saveTracker].figs3.close, saveAcNum);
+sprintf(buf, "\n\n You sent $%.2lf to account number %s",curr, saveAcNum);
 write(sock , buf , strlen(buf)+1);
 }
 }
@@ -719,8 +725,15 @@ write(sock , buf , strlen(buf)+1);
 }	
 	
 	}
-
-	void transactions_method(char* firstWord, char* secondWord, char* buf, int saveTracker, int sock){
+/*
+ * function transactions_method(): 
+ * algorithm: If the client requests a transaction history for any account
+ * 	       this function will handle and process the request
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
+void transactions_method(char* firstWord, char* secondWord, char* buf, int saveTracker, int sock){ 
 if(strcmp(firstWord, "TRANSACTIONS") == 0 && transactions != NULL) {
 	int transCount = 0;
 	for(int k = 0; k <= tranSize; k++){
@@ -745,33 +758,42 @@ if(atoi(secondWord) % 13 == 0){
 	int count1 = 0;
 	int count2 = 0;
 	for(int i = 0; i <= tranSize; i++){
-	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 11 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 2)) {
+	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 11 == 0 && transactions[i].tType == 4 ) {
 	count++;
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " , count,transactions[i].transType, transactions[i].amount*-1);
 	write(sock, buf, strlen(buf));	
 }
-	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 11 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3)){
+	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 11 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3 || transactions[i].tType == 2)){
 	count++;
+	if(transactions[i].tType == 2 && transactions[i].amount > 0){
+	transactions[i].amount = transactions[i].amount * - 1;	
+	}
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " ,  count ,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));
 }
-	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 12 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 2)) {
+	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 12 == 0 && transactions[i].tType == 4 ) {
 	count1++;
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " , count1,transactions[i].transType, transactions[i].amount*-1);
 	write(sock, buf, strlen(buf));	
 }
-	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 12 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3)){
+	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 12 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3 || transactions[i].tType == 2)){
 	count1++;
+	if(transactions[i].tType == 2 && transactions[i].amount > 0){
+	transactions[i].amount = transactions[i].amount * - 1;	
+	}
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " ,  count1 ,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));
 }
-	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 13 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 2)) {
+	if(atoi(secondWord) == transactions[i].fromAccount && atoi(secondWord) % 13 == 0 && transactions[i].tType == 4 ) {
 	count2++;
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " , count2,transactions[i].transType, transactions[i].amount*-1);
 	write(sock, buf, strlen(buf));	
 }
-	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 13 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3)){
+	if(atoi(secondWord) == transactions[i].toAccount && atoi(secondWord) % 13 == 0 && (transactions[i].tType == 4 || transactions[i].tType == 3 || transactions[i].tType == 2)){
 	count2++;
+		if(transactions[i].tType == 2 && transactions[i].amount > 0){
+	transactions[i].amount = transactions[i].amount * - 1;	
+	}
 	sprintf(buf, "\n   %d     \t%s     \t$%.2lf " ,  count2 ,transactions[i].transType, transactions[i].amount);
 	write(sock, buf, strlen(buf));
 }
@@ -789,7 +811,7 @@ sprintf(buf, "\n\n Closing Balance:  \t$%.2lf ", clientsinfo[saveTracker].figs3.
 write(sock, buf, strlen(buf)+1);
 }
 }
-	void external_from_savings(char* buf, char* firstWord, char* saveAcNum, char* secondWord, bool correctAc, char* onlineAc1, char* onlineAc2, char* onlineAc3, int saveTracker, int sock){
+void external_from_savings(char* buf, char* firstWord, char* saveAcNum, char* secondWord, bool correctAc, char* onlineAc1, char* onlineAc2, char* onlineAc3, int saveTracker, int sock){
 if(strcmp(firstWord, "AMOUNTD") == 0){
 for(int i = 0; i<10; i++){
 if(clientsinfo[i].account1 > 1 && clientsinfo[i].account1 == atoi(saveAcNum) && clientsinfo[i].account1 != clientsinfo[saveTracker].account1 && clientsinfo[i].account1 != clientsinfo[saveTracker].account2 && clientsinfo[i].account1 != clientsinfo[saveTracker].account3){
@@ -804,7 +826,7 @@ append_transaction(atoi(saveAcNum), atoi(onlineAc1), curr, "Transfer", 4);
 }
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("WOO HOO TRANSFER BABY");
-break;
+//break;
 }
 if(clientsinfo[i].account2 > 1 && clientsinfo[i].account2 == atoi(saveAcNum) && clientsinfo[i].account2 != clientsinfo[saveTracker].account1 && clientsinfo[i].account2 != clientsinfo[saveTracker].account2 && clientsinfo[i].account2 != clientsinfo[saveTracker].account3){
 correctAc = true;
@@ -818,7 +840,7 @@ append_transaction(atoi(saveAcNum), atoi(onlineAc2), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
-break;
+//break;
 }
 if(clientsinfo[i].account3 > 1 && clientsinfo[i].account3 == atoi(saveAcNum) && clientsinfo[i].account3 != clientsinfo[saveTracker].account1 && clientsinfo[i].account3 != clientsinfo[saveTracker].account2 && clientsinfo[i].account3 != clientsinfo[saveTracker].account2){
 correctAc = true;
@@ -832,7 +854,7 @@ append_transaction(atoi(saveAcNum), atoi(onlineAc3), curr, "Transfer", 4);
 printf("to %d from %d amount %f type Transfer", atoi(saveAcNum), atoi(onlineAc1), curr);
 printf("%s", secondWord);
 printf("WOO HOO TRANSFER BABY");
-break;
+//break;
 }
 
 }
@@ -850,15 +872,22 @@ clientsinfo[saveTracker].figs.close+=curr;
 sprintf(buf, "\ninsufficient Funds - Unable To Process Request");
 write(sock , buf , strlen(buf)+1);
 }else{
-sprintf(buf, "\n\n You sent $%.2lf to account number %s",clientsinfo[saveTracker].figs.close, saveAcNum);
+sprintf(buf, "\n\n You sent $%.2lf to account number %s",curr, saveAcNum);
 write(sock , buf , strlen(buf)+1);
 }
 
 }
 }
 }
-
-	void withdraw(char* onlineAc1, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
+/*
+ * function withdraw(): 
+ * algorithm: If the client requests a withdrawal transaction from the savings or credit account
+ * 	       this function will handle and process the request
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
+void withdraw(char* onlineAc1, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
 		
 	if(strcmp(firstWord, "WITHDRAWSAV") == 0) {
 	char* store;
@@ -866,7 +895,7 @@ write(sock , buf , strlen(buf)+1);
 	float calc = clientsinfo[saveTracker].figs.close -= curr;
 	if(calc >= 0){
 	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%.2lf", onlineName, onlineSurname, onlineAc1 , clientsinfo[saveTracker].figs.close);
-	append_transaction(atoi(onlineAc1), atoi(onlineAc1), curr, "Withdrawal", 2);
+	append_transaction(atoi(onlineAc1), atoi(onlineAc1), curr, "Withdraw", 2);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 		calc = clientsinfo[saveTracker].figs.close += curr;
@@ -880,7 +909,7 @@ write(sock , buf , strlen(buf)+1);
 	float calc = clientsinfo[saveTracker].figs3.close -= curr;
 	if(calc >= clientsinfo[saveTracker].figs3.open - 5000){
 	sprintf(buf, "\n\n %s %s Your balance for account %s is now $%.2lf", onlineName, onlineSurname, onlineAc3 , clientsinfo[saveTracker].figs3.close);
-	append_transaction(atoi(onlineAc3), atoi(onlineAc3), curr, "Withdrawal", 2);
+	append_transaction(atoi(onlineAc3), atoi(onlineAc3), curr, "Withdraw", 2);
 	write(sock , buf , strlen(buf)+1);////////////////////////////
 	}else{
 		calc = clientsinfo[saveTracker].figs3.close += curr;
@@ -889,7 +918,16 @@ write(sock , buf , strlen(buf)+1);
 
 }
 	}
-	void deposit(char* onlineAc1, char* onlineAc2, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
+/*
+ * function deposit(): 
+  algorithm: If the client requests a deposit transaction from any account
+ * 	       this function will handle and process the request
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
+void deposit(char* onlineAc1, char* onlineAc2, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){ 
+
 	if(strcmp(firstWord, "DEPOSITSAV") == 0) {
 	char* store;
 	float curr = strtod((secondWord),&store);
@@ -927,7 +965,15 @@ if(strcmp(firstWord, "DEPOSITCREDIT") == 0) {
 }
 }
 	}
-	void savings_internal(char* onlineAc1, char* onlineAc2, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
+/*
+ * function savings_internal(): 
+ * algorithm: If the client requests an internal transaction from their savings account
+ * 	       this function will handle and process the request
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
+void savings_internal(char* onlineAc1, char* onlineAc2, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
 //SINTERNALC Savings -> Credit Transfer
 if(strcmp(firstWord, "SINTERNALC") == 0){
 	//store the amount as a float curr
@@ -963,7 +1009,15 @@ if(strcmp(firstWord, "SINTERNALL") == 0){
 	}
 	}
 }
-	void external(char* firstWord, char* secondWord, int saveTracker, char* buf, int sock, char* saveAcNum){	
+/*
+ * function external(): 
+ * algorithm: If the client requests an external transaction 
+ * 	       this function will verify the users entered acc num and respond back with amount: or incorrect acc num 
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
+char* external(char* firstWord, char* secondWord, int saveTracker, char* buf, int sock, char* saveAcNum){	
 if(strcmp(firstWord, "EXTERNAL") == 0) {
 	int trigger = 0;
 	for(int i = 0; i < 24; i++){
@@ -985,8 +1039,17 @@ if(strcmp(firstWord, "TRANSACTIONS") == 0 && transactions == NULL){
 write(sock, "\n\n\nThere is currently no transaction history", strlen("There is currently no transaction history\n\n\n"));
 
 }
+return saveAcNum;
 	}
-	void credit_internal(char* onlineAc1, char* onlineAc2, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
+/*
+ * function credit_internal(): 
+ * algorithm: If the client requests an internal transaction from their credit account
+ * 	       this function will handle and process the request
+ *
+ * input:     A lot of variables
+ * output:    none.
+ */
+void credit_internal(char* onlineAc1, char* onlineAc2, char* onlineAc3, char* buf, char* onlineName, char* onlineSurname, char* firstWord, char* secondWord, int saveTracker, int sock){
 	//CINTERNALS Credit -> Savings Transfer
 	if(strcmp(firstWord, "CINTERNALS") == 0) {
 	char* store;
@@ -1023,7 +1086,14 @@ write(sock, "\n\n\nThere is currently no transaction history", strlen("There is 
 }
 	}
 
-
+/*
+ * function handle_request(): 
+ * algorithm: This function performs every action that the thread will need when it runs 
+ * 	      
+ *
+ * input:     a_request, thread_id
+ * output:    none.
+ */
 void handle_request(struct request* a_request, int thread_id)
 {
     if (a_request) {
@@ -1055,6 +1125,7 @@ int intval = arrayLim - '0';
 int intval2 = arrayLim2 - '0';
 char pinEntered[intval2];
 int match = 0;
+char* NUMBER;
 
       //STORING PIN SENT TO SERVER FROM CLIENT
       for (int i = 0; i < intval2; i++) {
@@ -1067,15 +1138,12 @@ int match = 0;
       //CONVERT PIN FROM CHAR ARRAY TO INT VALUE
       int sentPin;
       sscanf(pinEntered, "%d", & sentPin);
-      printf("Pin Send :   %i\n\n ", sentPin);
 	int tracker = 0;
 
 
 	 for (int i = 1; i < 11; i++) {
         match = 0;
         for (int k = 0; k < intval; k++) {
-          printf("%c  %c", clients[i].username[k], userEnteredName[k]);
-
           //CONFIRMING USERNAME MATCHES
           if (clients[i].username[k] == userEnteredName[k] && clients[i].pinNumber == sentPin) {
             match = match + 1;
@@ -1083,7 +1151,6 @@ int match = 0;
         }
 	   if (match == intval) { //Bunch of character arrays to send to client
 					login = true;
-          printf("MATCH\n");
 
           //Users client number
           usersClientNum = clients[i].clientNumber;
@@ -1107,7 +1174,7 @@ int match = 0;
 						saveTracker = tracker;
 						clientsinfo[tracker].figs.open = accounts[j].openBal;
 						clientsinfo[tracker].figs.close = accounts[j].closeBal;
-						printf("\n\nClient Number = %i \n Account Number %i \n Opening Balance = %f \n Closing Balance = %f \n",clientsinfo[tracker].clientnum,clientsinfo[tracker].account1, clientsinfo[tracker].figs.open, clientsinfo[tracker].figs.close);
+						
 }
 						if(clientsinfo[tracker].account2 == accounts[j].accNum){
 						clientsinfo[tracker].figs2.open = accounts[j].openBal;
@@ -1128,11 +1195,6 @@ int match = 0;
             }
 tracker++;
           }
-          for (int p = 0; p < 15; p++) {
-            //printf("%c\n", onlineAc1[p]);
-						printf("%c", onlineClose[p]);
-          }
-          printf("\nStored client num = %d", usersClientNum);
           sendStrings(sock, onlineName, 14);
           sendStrings(sock, onlineSurname, 14);
           sendStrings(sock, onlineCnum, 14);
@@ -1166,16 +1228,16 @@ tracker++;
 	deposit(onlineAc1, onlineAc2, onlineAc3, buf, onlineName, onlineSurname, firstWord, secondWord, saveTracker, sock);
 	savings_internal(onlineAc1, onlineAc2, onlineAc3, buf, onlineName, onlineSurname, firstWord, secondWord, saveTracker, sock);
 	credit_internal(onlineAc1, onlineAc2, onlineAc3, buf, onlineName, onlineSurname, firstWord, secondWord, saveTracker, sock);
-	external(firstWord, secondWord, saveTracker, buf, sock, saveAcNum);
+	NUMBER = external(firstWord, secondWord, saveTracker, buf, sock, saveAcNum);
 	transactions_method(firstWord, secondWord, buf, saveTracker, sock);
 	external_from_savings(buf, firstWord, saveAcNum, secondWord, correctAc, onlineAc1, onlineAc2, onlineAc3, saveTracker, sock);
-	external_from_credit(buf, firstWord, saveAcNum, secondWord, correctAc, onlineAc1, onlineAc2, onlineAc3, saveTracker, sock);
+	external_from_credit(buf, firstWord, NUMBER, secondWord, correctAc, onlineAc1, onlineAc2, onlineAc3, saveTracker, sock);
     }
     free(resultss);
 
     if(read_size == 0)
     {
-        puts("Client disconnected");
+       // puts("Client disconnected");
         fflush(stdout);
     }
     else if(read_size == -1)
@@ -1185,7 +1247,7 @@ tracker++;
     }
 }
 
-
+//Main
 int main(int argc, char *argv[]) {
 	//if ctrl+c is pressed
 
@@ -1247,7 +1309,6 @@ int main(int argc, char *argv[]) {
         printf("\n mutex init failed\n");
         return 1;
     }
-	printf("server starts listnening ...\n");
 
 	//Fills the clients struct , username , pin , clientNum
 	fillClients();
@@ -1269,8 +1330,6 @@ int main(int argc, char *argv[]) {
 			perror("accept");
 			continue;
 		}
-		printf("server: got connection from %s\n", \
-			inet_ntoa(their_addr.sin_addr));
 		newestSock = malloc(1);
 		*newestSock = new_fd;
 
