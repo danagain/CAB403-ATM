@@ -1,7 +1,3 @@
-/*
-*  Materials downloaded from the web. See relevant web sites listed on OLT
-*  Collected and modified for teaching purpose only by Jinglan Zhang, Aug. 2006
-*/
 #define _GNU_SOURCE
 #include <signal.h>
 #include <arpa/inet.h>
